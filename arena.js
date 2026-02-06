@@ -4,7 +4,7 @@
  * The foundation for The Cage
  */
 
-const Anthropic = require('anthropic');
+const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs').promises;
 const path = require('path');
 
