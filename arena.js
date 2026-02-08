@@ -39,30 +39,39 @@ class OllamaProvider {
   }
 
   async chat(messages, systemPrompt) {
-    const prompt = this.buildPrompt(messages, systemPrompt);
+    // Use the chat API instead of generate
+    const ollamaMessages = [];
     
-    const response = await fetch(`${this.endpoint}/api/generate`, {
+    if (systemPrompt) {
+      ollamaMessages.push({ role: 'system', content: systemPrompt });
+    }
+    
+    for (const msg of messages) {
+      ollamaMessages.push({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      });
+    }
+    
+    const response = await fetch(`${this.endpoint}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: this.model,
-        prompt: prompt,
+        messages: ollamaMessages,
         stream: false
       })
     });
     
-    const data = await response.json();
-    return data.response;
-  }
-
-  buildPrompt(messages, systemPrompt) {
-    let prompt = (systemPrompt || '') + '\n\n';
-    for (const msg of messages) {
-      const role = msg.role === 'user' ? 'Human' : 'Assistant';
-      prompt += `${role}: ${msg.content}\n\n`;
+    const text = await response.text();
+    
+    try {
+      const data = JSON.parse(text);
+      return data.message?.content || data.response || '';
+    } catch (e) {
+      console.error('Ollama parse error, raw response:', text.slice(0, 200));
+      throw new Error('Failed to parse Ollama response');
     }
-    prompt += 'Assistant:';
-    return prompt;
   }
 }
 
