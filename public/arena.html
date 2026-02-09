@@ -349,8 +349,7 @@
             <label>Turns</label>
             <input type="number" id="maxTurns" value="20" min="1" max="100">
           </div>
-          <button class="btn" id="startBtn">Start</button>
-          <button class="btn secondary" id="pauseBtn" disabled>Pause</button>
+          <button class="btn" id="mainBtn">Start</button>
           <button class="btn secondary" id="resetBtn">Reset</button>
         </div>
       </div>
@@ -613,13 +612,15 @@
     }
 
     // WebSocket
+    let battleState = 'idle'; // idle, running, paused, complete
     function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; $('statusText').textContent = 'Connected'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; $('statusText').textContent = 'Disconnected'; setTimeout(connect, 3000); }; }
     function handleMessage(d) { 
       switch (d.type) { 
         case 'battle_start': 
+          battleState = 'running';
           $('battleStatus').textContent = 'Running'; 
           $('battleStatus').className = 'battle-status running'; 
-          $('pauseBtn').disabled = false; 
+          $('mainBtn').textContent = 'Pause';
           $('messages1').innerHTML = ''; 
           $('messages2').innerHTML = ''; 
           $('postBattleButtons').style.display = 'none'; 
@@ -632,22 +633,25 @@
           battleHistory.push(d); 
           break; 
         case 'complete': 
+          battleState = 'complete';
           $('battleStatus').textContent = 'Complete'; 
           $('battleStatus').className = 'battle-status complete'; 
-          $('pauseBtn').disabled = true; 
+          $('mainBtn').textContent = 'Start';
           $('postBattleButtons').style.display = 'flex'; 
           $('keepAgent1').style.display = 'inline-block';
           $('keepAgent2').style.display = 'inline-block';
           break; 
         case 'paused': 
+          battleState = 'paused';
           $('battleStatus').textContent = 'Paused'; 
           $('battleStatus').className = 'battle-status paused'; 
-          $('pauseBtn').textContent = 'Resume'; 
+          $('mainBtn').textContent = 'Resume'; 
           break; 
         case 'resumed': 
+          battleState = 'running';
           $('battleStatus').textContent = 'Running'; 
           $('battleStatus').className = 'battle-status running'; 
-          $('pauseBtn').textContent = 'Pause'; 
+          $('mainBtn').textContent = 'Pause'; 
           break; 
       } 
     }
@@ -694,7 +698,7 @@
       $('badges2').innerHTML = (agents[2].soul ? '<span class="badge soul">Soul</span>' : '') + (agents[2].brain ? '<span class="badge brain">Brain</span>' : '');
       
       const maxTurns = Math.max(1, Math.min(100, parseInt($('maxTurns').value) || 20));
-      $('turnMax').textContent = maxTurns; $('turnCurrent').textContent = '0'; $('startBtn').disabled = true;
+      $('turnMax').textContent = maxTurns; $('turnCurrent').textContent = '0'; $('mainBtn').disabled = true;
       
       try { 
         const r = await fetch(API + '/api/battle', { 
@@ -712,7 +716,7 @@
         if (d.error) alert('Error: ' + d.error); 
         else battle = d.battleId; 
       } catch { alert('Failed'); }
-      $('startBtn').disabled = false;
+      $('mainBtn').disabled = false;
     }
     
     async function togglePause() { if (!battle) return; await fetch(`${API}/api/battle/${battle}/${$('battleStatus').textContent === 'Paused' ? 'resume' : 'pause'}`, { method: 'POST' }); }
@@ -852,8 +856,9 @@
       $('keepAgent1').classList.remove('active');
       $('keepAgent2').style.display = 'none';
       $('keepAgent2').classList.remove('active');
-      $('pauseBtn').disabled = true;
-      $('startBtn').disabled = false;
+      $('mainBtn').textContent = 'Start';
+      $('mainBtn').disabled = false;
+      battleState = 'idle';
       
       // Reset preset selects
       $('presetSelect1').value = '';
@@ -919,14 +924,23 @@
     $('advancedToggle').onclick = toggleAdvanced;
     $('promptMode').onchange = updatePromptMode;
     $('anonymousToggle').onclick = toggleAnonymous;
-    $('startBtn').onclick = startBattle;
-    $('pauseBtn').onclick = togglePause;
+    $('mainBtn').onclick = mainButtonClick;
     $('exportBtn').onclick = exportTranscript;
     $('keepAgent1').onclick = keepAgent1;
     $('keepAgent2').onclick = keepAgent2;
     $('publishBtn').onclick = publishToArchive;
     $('logoutBtn').onclick = logout;
     $('resetBtn').onclick = resetArena;
+    
+    function mainButtonClick() {
+      if (battleState === 'idle' || battleState === 'complete') {
+        startBattle();
+      } else if (battleState === 'running') {
+        togglePause();
+      } else if (battleState === 'paused') {
+        togglePause();
+      }
+    }
 
     // Load agent from builder if coming from there
     function loadFromBuilder() {
