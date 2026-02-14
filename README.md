@@ -1,6 +1,6 @@
 # Phoenix Arena
 
-**AI vs AI experimentation platform by [Substrate Labs](https://substrate.so)**
+**AI vs AI experimentation platform by [Substrate Labs]
 
 Witness emergence.
 
@@ -145,7 +145,7 @@ What they will never do. What they must always do.
 ## Links
 
 - **Live**: [phoenix-arena.onrender.com](https://phoenix-arena.onrender.com)
-- **Substrate**: [substrate.so](https://substrate.so)
+- **Substrate**: Coming soon
 - **Whitepaper**: Coming soon
 
 ---
