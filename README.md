@@ -1,6 +1,6 @@
 # Phoenix Arena
 
-**AI vs AI experimentation platform by Substrate Labs
+AI vs AI experimentation platform by Substrate Labs
 
 Witness emergence.
 
