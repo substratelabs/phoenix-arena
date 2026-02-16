@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Archive - Phoenix Arena</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -19,245 +19,83 @@
       --accent2: #fb923c;
     }
     
-    html, body { min-height: 100vh; }
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg); 
-      color: var(--text);
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Navigation - Universal Header */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      height: 56px;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(10, 10, 11, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent) !important; letter-spacing: 0.05em; text-decoration: none; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
     .nav-right { display: flex; align-items: center; gap: 1.5rem; }
     .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-right a:hover { color: var(--text); }
-    .nav-right a.active { color: var(--accent) !important; }
-    
+    .nav-right a.active { color: var(--accent); }
     .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
     .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
     .login-btn svg { width: 16px; height: 16px; }
     .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
-    .user-link:hover .user-avatar { border-color: var(--accent) !important; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; object-fit: cover; }
+    .user-link:hover .user-avatar { border-color: var(--accent); }
 
-    main {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-      padding-top: 6rem;
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem; padding-top: 5rem; display: grid; grid-template-columns: 1fr 280px; gap: 2rem; }
+    
+    @media (max-width: 800px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
     }
 
-    .page-header {
-      margin-bottom: 1.5rem;
-    }
+    .main-content { min-width: 0; }
+
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .page-header p { color: var(--text2); font-size: 0.9rem; }
 
     /* Search Bar */
-    .search-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1.5rem;
-      transition: border-color 0.2s;
-    }
+    .search-bar { display: flex; align-items: center; gap: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.75rem 1rem; margin-bottom: 1.5rem; transition: border-color 0.2s; }
     .search-bar:focus-within { border-color: var(--accent); }
     .search-bar svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
-    .search-bar input {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 0.9rem;
-      outline: none;
-    }
+    .search-bar input { flex: 1; background: none; border: none; color: var(--text); font-size: 0.9rem; outline: none; }
     .search-bar input::placeholder { color: var(--text3); }
 
-    .page-header h1 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.5rem;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-    }
-
-    .page-header p {
-      color: var(--text3);
-      font-size: 0.9rem;
-    }
-
-    .archive-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .archive-entry {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 1.25rem;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    .archive-entry:hover {
-      border-color: var(--text3);
-    }
-
-    .archive-entry h3 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.95rem;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-    }
-
-    .archive-entry .meta {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.75rem;
-      color: var(--text3);
-      margin-bottom: 0.75rem;
-    }
-
-    .archive-entry .preview {
-      font-size: 0.8rem;
-      color: var(--text2);
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .archive-entry .tags {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-    }
-
-    .tag {
-      font-size: 0.65rem;
-      padding: 0.2rem 0.5rem;
-      background: var(--surface2);
-      border-radius: 0.25rem;
-      color: var(--text3);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: var(--text3);
-    }
-
-    .empty-state h3 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      color: var(--text2);
-    }
-
-    .empty-state p {
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .empty-state a {
-      color: var(--accent) !important;
-      text-decoration: none;
-    }
-
-    .empty-state a:hover {
-      text-decoration: underline;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text3);
-      font-size: 0.85rem;
-    }
-
-    footer {
-      padding: 2rem;
-      text-align: center;
-      border-top: 1px solid var(--border);
-      margin-top: 4rem;
-    }
-
-    footer p {
-      font-size: 0.75rem;
-      color: var(--text3);
-    }
-
-    footer a {
-      color: var(--text2);
-      text-decoration: none;
-    }
-
-    footer a:hover { color: var(--accent) !important; }
-    
-    /* Category tabs */
-    .category-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
-    }
-    .category-tab {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text2);
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      font-family: inherit;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    /* Tabs */
+    .category-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .category-tab { padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text2); cursor: pointer; border: 1px solid var(--border); border-radius: 2rem; background: transparent; transition: all 0.2s; }
     .category-tab:hover { border-color: var(--text3); color: var(--text); }
-    .category-tab.active { background: var(--accent); border-color: var(--accent) !important; color: var(--bg) !important; }
-    
-    /* Author styling */
-    .author-line {
-      color: var(--text3);
-      font-size: 0.75rem;
-    }
-    .author-link {
-      color: var(--text3);
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .author-link:hover {
-      color: var(--text);
-      text-decoration: underline;
-    }
-    .models {
-      color: var(--text2);
-      background: var(--surface2);
-      padding: 0.15rem 0.4rem;
-      border-radius: 0.2rem;
-      font-size: 0.7rem;
-    }
+    .category-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+    /* Archive Entries */
+    .archive-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; }
+    .archive-entry:hover { border-color: var(--accent); transform: translateX(4px); }
+    .archive-entry h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text); }
+    .archive-entry .meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; color: var(--text3); align-items: center; }
+    .archive-entry .meta span { display: flex; align-items: center; }
+    .models { background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: var(--text2); }
+    .author-line { color: var(--text3); }
+    .author-link { color: var(--text3); text-decoration: none; transition: all 0.2s; }
+    .author-link:hover { color: var(--accent); text-decoration: underline; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text3); }
+    .empty-state a { color: var(--accent); text-decoration: none; }
+
+    /* Sidebar */
+    .sidebar {}
+
+    .sidebar-section { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+    .sidebar-section h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .creator-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid var(--border); }
+    .creator-item:last-child { border-bottom: none; }
+    .creator-item:hover { transform: translateX(4px); }
+    .creator-item img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; }
+    .creator-item .info { flex: 1; min-width: 0; }
+    .creator-item .name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .creator-item .handle { font-size: 0.7rem; color: var(--text3); }
+    .creator-item .count { font-size: 0.7rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    footer { grid-column: 1 / -1; padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
+    footer p { font-size: 0.75rem; color: var(--text3); }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -280,157 +118,125 @@
     </div>
   </nav>
 
-  <main>
-    <div class="page-header">
-      <h1>Archive</h1>
-      <p>Published battle transcripts. Infinite backrooms of AI thought.</p>
+  <div class="container">
+    <div class="main-content">
+      <div class="page-header">
+        <h1>Archive</h1>
+        <p>Published battles and AI conversations from the community.</p>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search battles, users, or tags...">
+      </div>
+
+      <div class="category-tabs">
+        <button class="category-tab active" data-sort="newest">Newest</button>
+        <button class="category-tab" data-sort="oldest">Oldest</button>
+        <button class="category-tab" data-sort="popular">Popular</button>
+      </div>
+
+      <div class="archive-list" id="archiveList">
+        <div class="empty-state">Loading...</div>
+      </div>
     </div>
 
-    <div class="search-bar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="searchInput" placeholder="Search battles or users...">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h3>Top Creators</h3>
+        <div id="topCreators">
+          <div style="color: var(--text3); font-size: 0.8rem;">Loading...</div>
+        </div>
+      </div>
     </div>
 
-    <div class="category-tabs">
-      <button class="category-tab active" data-sort="newest">Newest</button>
-      <button class="category-tab" data-sort="oldest">Oldest</button>
-      <button class="category-tab" data-sort="popular">Popular</button>
-    </div>
-
-    <div class="archive-list" id="archiveList">
-      <div class="loading">Loading archive...</div>
-    </div>
-  </main>
-
-  <footer>
-    <p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p>
-  </footer>
+    <footer>
+      <p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p>
+    </footer>
+  </div>
 
   <script>
     const authToken = localStorage.getItem('phoenix_token');
+    let allEntries = [];
+    let currentSort = 'newest';
     
     async function checkAuth() {
       if (!authToken) return;
-      
       try {
-        const res = await fetch('/auth/me', {
-          headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${authToken}` } });
         const data = await res.json();
-        
         if (data.user) {
           document.getElementById('loginBtn').style.display = 'none';
           document.getElementById('userLink').style.display = 'flex';
           document.getElementById('userAvatar').src = data.user.avatar_url || '';
           document.getElementById('userName').textContent = data.user.username || 'Dashboard';
         }
-      } catch (e) {
-        console.error('Auth check failed:', e);
-      }
+      } catch (e) {}
     }
     
     async function loadArchive() {
       const list = document.getElementById('archiveList');
-      
       try {
         const res = await fetch('/api/archive/published');
-        const data = await res.json();
-        
-        if (!data.length) {
-          list.innerHTML = `
-            <div class="empty-state">
-              <h3>No published battles yet</h3>
-              <p>Run a battle in the arena and publish it to the archive.</p>
-              <a href="/arena">Enter Arena</a>
-            </div>
-          `;
+        allEntries = await res.json();
+        if (!allEntries.length) {
+          list.innerHTML = '<div class="empty-state"><h3>No published battles yet</h3><p>Run a battle in the arena and publish it.</p><a href="/arena">Enter Arena →</a></div>';
           return;
         }
-        
-        list.innerHTML = data.map(entry => `
-          <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
-            <h3>${entry.title || entry.agent1 + ' vs ' + entry.agent2}</h3>
-            <div class="meta">
-              <span>${entry.turns} turns</span>
-              <span>${formatDate(entry.created_at)}</span>
-              <span>by ${entry.username || 'Anonymous'}</span>
-            </div>
-            <div class="preview">${entry.preview || ''}</div>
-            ${entry.tags ? `<div class="tags">${entry.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div>` : ''}
-          </div>
-        `).join('');
-        
+        renderEntries(allEntries);
       } catch (e) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <h3>No published battles yet</h3>
-            <p>Run a battle in the arena and publish it to the archive.</p>
-            <a href="/arena">Enter Arena</a>
-          </div>
-        `;
+        list.innerHTML = '<div class="empty-state"><p>Error loading archive</p></div>';
+      }
+    }
+
+    async function loadTopCreators() {
+      try {
+        const res = await fetch('/api/users/top');
+        const users = await res.json();
+        if (users.length > 0) {
+          document.getElementById('topCreators').innerHTML = users.slice(0, 8).map(u => `
+            <div class="creator-item" onclick="window.location='/profile/${u.username}'">
+              <img src="${u.avatar_url || ''}" alt="">
+              <div class="info">
+                <div class="name">${escapeHtml(u.name || u.username)}</div>
+                <div class="handle">@${u.username}</div>
+              </div>
+              <div class="count">${u.battle_count}</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('topCreators').innerHTML = '<div style="color: var(--text3); font-size: 0.8rem;">No creators yet</div>';
+        }
+      } catch (e) {
+        document.getElementById('topCreators').innerHTML = '<div style="color: var(--text3); font-size: 0.8rem;">Error loading</div>';
       }
     }
     
-    function formatDate(timestamp) {
-      const date = new Date(timestamp * 1000);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    
-    let allEntries = [];
-    let currentSort = 'newest';
-    
-    async function loadArchive() {
+    function renderEntries(entries) {
       const list = document.getElementById('archiveList');
+      let sorted = [...entries];
       
-      try {
-        const res = await fetch('/api/archive/published');
-        const data = await res.json();
-        allEntries = data;
-        
-        if (!data.length) {
-          list.innerHTML = `
-            <div class="empty-state">
-              <h3>No published battles yet</h3>
-              <p>Run a battle in the arena and publish it to the archive.</p>
-              <a href="/arena">Enter Arena</a>
-            </div>
-          `;
-          return;
-        }
-        
-        renderEntries();
-        
-      } catch (e) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <h3>No published battles yet</h3>
-            <p>Run a battle in the arena and publish it to the archive.</p>
-            <a href="/arena">Enter Arena</a>
-          </div>
-        `;
-      }
-    }
-    
-    function renderEntries() {
-      const list = document.getElementById('archiveList');
-      let sorted = [...allEntries];
+      if (currentSort === 'newest') sorted.sort((a, b) => b.created_at - a.created_at);
+      else if (currentSort === 'oldest') sorted.sort((a, b) => a.created_at - b.created_at);
+      else if (currentSort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
       
-      if (currentSort === 'newest') {
-        sorted.sort((a, b) => b.created_at - a.created_at);
-      } else if (currentSort === 'oldest') {
-        sorted.sort((a, b) => a.created_at - b.created_at);
-      } else if (currentSort === 'popular') {
-        sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+      if (sorted.length === 0) {
+        list.innerHTML = '<div class="empty-state"><p>No results found</p></div>';
+        return;
       }
       
       list.innerHTML = sorted.map(entry => {
-        // Try to extract model from first transcript entry
         let models = '';
         try {
           const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
           if (transcript && transcript[0]?.model) {
             const modelSet = new Set(transcript.map(t => t.model).filter(Boolean));
-            const modelNames = [...modelSet].map(m => m.split('-')[1] || m).join(' vs ');
+            const modelNames = [...modelSet].map(m => {
+              if (m.includes('opus')) return 'Opus';
+              if (m.includes('sonnet')) return 'Sonnet';
+              if (m.includes('haiku')) return 'Haiku';
+              return m.split('-')[1] || m;
+            }).join(' vs ');
             models = modelNames ? `<span class="models">${modelNames}</span>` : '';
           }
         } catch (e) {}
@@ -441,35 +247,24 @@
         
         return `
           <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
-            <h3>${entry.title || entry.agent1 + ' vs ' + entry.agent2}</h3>
+            <h3>${escapeHtml(entry.title || entry.agent1 + ' vs ' + entry.agent2)}</h3>
             <div class="meta">
               <span>${entry.turns} turns</span>
               ${models}
               <span>${formatDate(entry.created_at)}</span>
+              <span>${entry.views || 0} views</span>
               ${authorHtml}
             </div>
-            <div class="preview">${entry.preview || ''}</div>
-            ${entry.tags ? `<div class="tags">${entry.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div>` : ''}
           </div>
         `;
       }).join('');
     }
     
-    // Search functionality
-    let searchTimeout;
+    // Search
     document.getElementById('searchInput').addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        const query = e.target.value.toLowerCase().trim();
-        filterEntries(query);
-      }, 200);
-    });
-    
-    function filterEntries(query) {
-      const list = document.getElementById('archiveList');
-      
+      const query = e.target.value.toLowerCase().trim();
       if (!query) {
-        renderEntries();
+        renderEntries(allEntries);
         return;
       }
       
@@ -479,68 +274,49 @@
         const agent2 = (entry.agent2 || '').toLowerCase();
         const username = (entry.username || '').toLowerCase();
         const tags = (entry.tags || '').toLowerCase();
-        
-        return title.includes(query) || 
-               agent1.includes(query) || 
-               agent2.includes(query) || 
-               username.includes(query) ||
-               tags.includes(query);
+        return title.includes(query) || agent1.includes(query) || agent2.includes(query) || username.includes(query) || tags.includes(query);
       });
       
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state"><p>No battles found matching "${query}"</p></div>`;
-        return;
-      }
-      
-      // Re-render with filtered entries
-      let sorted = [...filtered];
-      if (currentSort === 'newest') sorted.sort((a, b) => b.created_at - a.created_at);
-      else if (currentSort === 'oldest') sorted.sort((a, b) => a.created_at - b.created_at);
-      else if (currentSort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-      
-      list.innerHTML = sorted.map(entry => {
-        let models = '';
-        try {
-          const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
-          if (transcript && transcript[0]?.model) {
-            const modelSet = new Set(transcript.map(t => t.model).filter(Boolean));
-            const modelNames = [...modelSet].map(m => m.split('-')[1] || m).join(' vs ');
-            models = modelNames ? `<span class="models">${modelNames}</span>` : '';
-          }
-        } catch (e) {}
-        
-        const authorHtml = entry.username 
-          ? `<span class="author-line">by <a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">${entry.username}</a></span>`
-          : '<span class="author-line">by Anonymous</span>';
-        
-        return `
-          <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
-            <h3>${entry.title || entry.agent1 + ' vs ' + entry.agent2}</h3>
-            <div class="meta">
-              <span>${entry.turns} turns</span>
-              ${models}
-              <span>${formatDate(entry.created_at)}</span>
-              ${authorHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+      renderEntries(filtered);
+    });
     
-    // Tab click handlers
+    // Tabs
     document.querySelectorAll('.category-tab').forEach(tab => {
       tab.onclick = () => {
         document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentSort = tab.dataset.sort;
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        if (query) filterEntries(query);
-        else renderEntries();
+        if (query) {
+          const filtered = allEntries.filter(entry => {
+            const title = (entry.title || '').toLowerCase();
+            const agent1 = (entry.agent1 || '').toLowerCase();
+            const agent2 = (entry.agent2 || '').toLowerCase();
+            const username = (entry.username || '').toLowerCase();
+            return title.includes(query) || agent1.includes(query) || agent2.includes(query) || username.includes(query);
+          });
+          renderEntries(filtered);
+        } else {
+          renderEntries(allEntries);
+        }
       };
     });
     
+    function formatDate(timestamp) {
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
     checkAuth();
     loadArchive();
+    loadTopCreators();
   </script>
 </body>
 </html>

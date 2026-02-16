@@ -112,8 +112,8 @@
       padding: 1rem;
     }
     
-    .agent-card.agent-0 { border-left: 3px solid var(--agent1); }
-    .agent-card.agent-1 { border-left: 3px solid var(--agent2); }
+    .agent-card.agent-0 { border-left: 3px solid var(--accent); }
+    .agent-card.agent-1 { border-left: 3px solid var(--text3); }
     
     .agent-card-header {
       display: flex;
@@ -126,22 +126,24 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
       font-weight: 500;
+      color: var(--text2);
     }
     
-    .agent-card.agent-0 .agent-card-title { color: var(--agent1); }
-    .agent-card.agent-1 .agent-card-title { color: var(--agent2); }
+    .agent-card.agent-0 .agent-card-title { color: var(--accent); }
+    .agent-card.agent-1 .agent-card-title { color: var(--text2); }
     
     .agent-model {
       font-size: 0.7rem;
-      color: var(--text3);
-      background: var(--surface2);
+      color: var(--accent);
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.3);
       padding: 0.2rem 0.5rem;
       border-radius: 0.25rem;
     }
     
     .agent-card-name {
       font-size: 0.9rem;
-      color: var(--text2);
+      color: var(--text);
     }
 
     .badge {
@@ -182,13 +184,13 @@
       color: var(--text3);
     }
     .author-link {
-      color: var(--text3);
-      text-decoration: none;
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
       transition: all 0.2s;
     }
     .author-link:hover {
-      color: var(--text);
-      text-decoration: underline;
+      color: var(--accent2);
     }
 
     .battle-config {

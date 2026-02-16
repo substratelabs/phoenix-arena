@@ -22,7 +22,6 @@
     
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Universal Header */
     nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
     .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
@@ -35,18 +34,16 @@
     .login-btn svg { width: 16px; height: 16px; }
     .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; object-fit: cover; }
     .user-link:hover .user-avatar { border-color: var(--accent); }
 
     main { max-width: 900px; margin: 0 auto; padding: 2rem; padding-top: 5rem; }
 
-    /* Login Prompt */
     .login-prompt { text-align: center; padding: 4rem 2rem; }
     .login-prompt h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; margin-bottom: 0.5rem; }
     .login-prompt p { color: var(--text2); margin-bottom: 2rem; }
     .login-prompt .login-btn { display: inline-flex; padding: 0.75rem 1.5rem; font-size: 1rem; }
 
-    /* Profile Header */
     .profile-header { display: flex; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
     .avatar-section { position: relative; }
     .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
@@ -66,10 +63,9 @@
     .profile-stats .stat:hover { color: var(--text); }
     .profile-stats .number { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
 
-    /* Modal */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; width: 100%; max-width: 450px; padding: 1.5rem; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; width: 100%; max-width: 450px; padding: 1.5rem; max-height: 90vh; overflow-y: auto; }
     .modal h2 { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; margin-bottom: 1.5rem; }
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
@@ -86,11 +82,10 @@
     .btn.danger { color: #ef4444; border-color: #ef4444; background: transparent; }
     .btn.danger:hover { background: #ef4444; color: white; }
 
-    /* Followers List */
     .followers-list { max-height: 400px; overflow-y: auto; }
     .follower-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
     .follower-item:last-child { border-bottom: none; }
-    .follower-item img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); }
+    .follower-item img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; cursor: pointer; }
     .follower-info { flex: 1; cursor: pointer; }
     .follower-info .name { font-weight: 500; font-size: 0.9rem; }
     .follower-info .handle { color: var(--text3); font-size: 0.8rem; }
@@ -99,7 +94,6 @@
     .follow-btn.following { background: var(--surface2); border-color: var(--border); color: var(--text2); }
     .follow-btn.following:hover { border-color: #ef4444; color: #ef4444; background: transparent; }
 
-    /* Tabs */
     .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
     .tab { padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
     .tab:hover { color: var(--text); }
@@ -107,7 +101,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Battle Cards */
     .battles-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .battle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .battle-card:hover { border-color: var(--accent); transform: translateX(4px); }
@@ -118,23 +111,26 @@
     .empty-state a { color: var(--accent); text-decoration: none; }
     .empty-state a:hover { text-decoration: underline; }
 
-    /* Top Users */
-    .top-users { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; }
-    .top-users h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text3); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .top-user { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; cursor: pointer; transition: all 0.2s; }
-    .top-user:hover { transform: translateX(4px); }
-    .top-user img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); }
-    .top-user .info { flex: 1; }
-    .top-user .name { font-size: 0.85rem; font-weight: 500; }
-    .top-user .count { font-size: 0.7rem; color: var(--text3); }
-
-    /* Settings */
     .settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.25rem; margin-bottom: 1rem; }
     .settings-section h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 500; color: var(--text2); margin-bottom: 1rem; }
-    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border); gap: 1rem; }
     .setting-row:last-child { border-bottom: none; }
-    .setting-label { font-size: 0.9rem; }
+    .setting-label { font-size: 0.9rem; flex-shrink: 0; }
     .setting-label span { display: block; font-size: 0.75rem; color: var(--text3); margin-top: 0.2rem; }
+    .setting-input { display: flex; gap: 0.5rem; flex: 1; max-width: 350px; }
+    .setting-input input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.8rem; }
+    .setting-input input:focus { outline: none; border-color: var(--accent); }
+
+    /* Discover Section */
+    .discover-section { margin-bottom: 2rem; }
+    .discover-section h2 { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text2); margin-bottom: 1rem; }
+    .discover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .discover-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .discover-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .discover-card img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--border); margin-bottom: 0.75rem; object-fit: cover; }
+    .discover-card .name { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .discover-card .handle { color: var(--text3); font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .discover-card .stats { font-size: 0.75rem; color: var(--text2); }
 
     footer { padding: 2rem; text-align: center; border-top: 1px solid var(--border); margin-top: 4rem; }
     footer p { font-size: 0.75rem; color: var(--text3); }
@@ -202,13 +198,14 @@
         </div>
       </div>
 
-      <div class="top-users" id="topUsers">
-        <h3>Top Creators</h3>
-        <div id="topUsersList"></div>
+      <!-- Discover Users -->
+      <div class="discover-section" id="discoverSection">
+        <h2>Discover Creators</h2>
+        <div class="discover-grid" id="discoverGrid"></div>
       </div>
 
       <div class="tabs">
-        <div class="tab active" data-tab="battles">Battles</div>
+        <div class="tab active" data-tab="battles">Your Battles</div>
         <div class="tab" data-tab="settings">Settings</div>
       </div>
 
@@ -220,13 +217,25 @@
 
       <div class="tab-content" id="settings-tab">
         <div class="settings-section">
+          <h3>API Key</h3>
+          <div class="setting-row">
+            <div class="setting-label">
+              Anthropic API Key
+              <span>Your key is stored securely and used for battles</span>
+            </div>
+            <div class="setting-input">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+              <button class="btn" onclick="saveApiKey()">Save</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
           <h3>Account</h3>
           <div class="setting-row">
-            <div class="setting-label">API Key (BYOK)<span>Use your own Anthropic API key</span></div>
-            <button class="btn" onclick="window.location='/arena'">Manage in Arena</button>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">Sign Out<span>End your current session</span></div>
+            <div class="setting-label">
+              Sign Out
+              <span>End your current session</span>
+            </div>
             <button class="btn danger" id="logoutBtn">Logout</button>
           </div>
         </div>
@@ -260,22 +269,16 @@
     const token = localStorage.getItem('phoenix_token');
     let currentUser = null;
     
-    (function() {
+    function updateNavAuth(user) {
       const loginBtn = document.getElementById('loginBtn');
       const userLink = document.getElementById('userLink');
-      if (token && loginBtn) {
-        fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => res.json())
-        .then(data => {
-          if (data.user) {
-            loginBtn.style.display = 'none';
-            userLink.style.display = 'flex';
-            document.getElementById('userAvatar').src = data.user.avatar_url || '';
-            document.getElementById('userName').textContent = data.user.username || 'Dashboard';
-          }
-        }).catch(() => {});
+      if (user) {
+        loginBtn.style.display = 'none';
+        userLink.style.display = 'flex';
+        document.getElementById('userAvatar').src = user.avatar_url || '';
+        document.getElementById('userName').textContent = user.username || 'Dashboard';
       }
-    })();
+    }
 
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -293,6 +296,9 @@
         const userData = await userRes.json();
         if (!userData.user) { localStorage.removeItem('phoenix_token'); document.getElementById('loginPrompt').style.display = 'block'; document.getElementById('dashboardContent').style.display = 'none'; return; }
         currentUser = userData.user;
+        
+        updateNavAuth(currentUser);
+        
         document.getElementById('loginPrompt').style.display = 'none';
         document.getElementById('dashboardContent').style.display = 'block';
         document.getElementById('profileAvatar').src = currentUser.avatar_url || '';
@@ -301,6 +307,11 @@
         document.getElementById('profileBio').textContent = currentUser.bio || 'No bio yet. Click edit to add one.';
         document.getElementById('statFollowers').textContent = currentUser.followers_count || 0;
         document.getElementById('statFollowing').textContent = currentUser.following_count || 0;
+        
+        // Load API key if exists
+        if (currentUser.api_key) {
+          document.getElementById('apiKeyInput').value = currentUser.api_key;
+        }
         
         const battlesRes = await fetch('/api/archive/user', { headers: { 'Authorization': `Bearer ${token}` } });
         const battles = await battlesRes.json();
@@ -315,22 +326,34 @@
             </div>
           `).join('');
         }
-        loadTopUsers();
+        
+        loadDiscoverUsers();
       } catch (e) { console.error('Dashboard error:', e); }
     }
 
-    async function loadTopUsers() {
+    async function loadDiscoverUsers() {
       try {
         const res = await fetch('/api/users/top');
         const users = await res.json();
-        if (users.length > 0) {
-          document.getElementById('topUsersList').innerHTML = users.slice(0, 5).map(u => `
-            <div class="top-user" onclick="window.location='/profile/${u.username}'">
-              <img src="${u.avatar_url || ''}" alt=""><div class="info"><div class="name">${escapeHtml(u.name || u.username)}</div><div class="count">${u.battle_count} battles</div></div>
+        
+        // Filter out current user
+        const others = users.filter(u => u.id !== currentUser.id);
+        
+        if (others.length > 0) {
+          document.getElementById('discoverGrid').innerHTML = others.slice(0, 6).map(u => `
+            <div class="discover-card" onclick="window.location='/profile/${u.username}'">
+              <img src="${u.avatar_url || ''}" alt="">
+              <div class="name">${escapeHtml(u.name || u.username)}</div>
+              <div class="handle">@${u.username}</div>
+              <div class="stats">${u.battle_count} battles</div>
             </div>
           `).join('');
-        } else { document.getElementById('topUsers').style.display = 'none'; }
-      } catch (e) { document.getElementById('topUsers').style.display = 'none'; }
+        } else {
+          document.getElementById('discoverSection').style.display = 'none';
+        }
+      } catch (e) {
+        document.getElementById('discoverSection').style.display = 'none';
+      }
     }
 
     function openEditModal() {
@@ -348,20 +371,70 @@
       if (!username.match(/^[a-z0-9_]+$/)) { alert('Username can only contain lowercase letters, numbers, and underscores'); return; }
       try {
         const res = await fetch('/api/profile/update', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ name, username, bio }) });
-        if (res.ok) { closeEditModal(); showToast('Profile saved!'); loadDashboard(); } else { const err = await res.json(); alert(err.error || 'Failed to save'); }
+        if (res.ok) { 
+          closeEditModal(); 
+          showToast('Profile saved!'); 
+          // Update local user object
+          currentUser.name = name;
+          currentUser.username = username;
+          currentUser.bio = bio;
+          // Update UI immediately
+          document.getElementById('profileName').textContent = name || username;
+          document.getElementById('profileUsername').textContent = '@' + username;
+          document.getElementById('profileBio').textContent = bio || 'No bio yet. Click edit to add one.';
+          updateNavAuth(currentUser);
+        } else { const err = await res.json(); alert(err.error || 'Failed to save'); }
       } catch (e) { alert('Error saving profile'); }
+    }
+
+    async function saveApiKey() {
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      try {
+        const res = await fetch('/api/profile/apikey', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+          body: JSON.stringify({ apiKey }) 
+        });
+        if (res.ok) { 
+          showToast('API key saved!');
+          // Also store in localStorage for arena
+          if (apiKey) {
+            localStorage.setItem('anthropic_api_key', apiKey);
+          } else {
+            localStorage.removeItem('anthropic_api_key');
+          }
+        } else { 
+          alert('Failed to save API key'); 
+        }
+      } catch (e) { alert('Error saving API key'); }
     }
 
     document.getElementById('avatarInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2MB'); return; }
-      const formData = new FormData();
-      formData.append('avatar', file);
-      try {
-        const res = await fetch('/api/profile/avatar', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-        if (res.ok) { showToast('Avatar updated!'); loadDashboard(); } else { alert('Failed to upload avatar'); }
-      } catch (e) { alert('Error uploading avatar'); }
+      
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const res = await fetch('/api/profile/avatar', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+            body: JSON.stringify({ avatar: reader.result }) 
+          });
+          if (res.ok) { 
+            const data = await res.json();
+            showToast('Avatar updated!');
+            currentUser.avatar_url = data.avatar_url;
+            document.getElementById('profileAvatar').src = data.avatar_url;
+            updateNavAuth(currentUser);
+          } else { 
+            alert('Failed to upload avatar'); 
+          }
+        } catch (e) { alert('Error uploading avatar'); }
+      };
+      reader.readAsDataURL(file);
     });
 
     async function openFollowersModal(type) {
@@ -387,7 +460,7 @@
       const isFollowing = btn.classList.contains('following');
       try {
         const res = await fetch(`/api/users/${username}/${isFollowing ? 'unfollow' : 'follow'}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) { btn.classList.toggle('following'); btn.textContent = isFollowing ? 'Follow' : 'Following'; loadDashboard(); }
+        if (res.ok) { btn.classList.toggle('following'); btn.textContent = isFollowing ? 'Follow' : 'Following'; }
       } catch (e) {}
     }
 
