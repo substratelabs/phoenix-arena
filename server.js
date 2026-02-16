@@ -46,6 +46,11 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Serve profile page
+app.get('/profile/:username', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+});
+
 // Serve battle viewer page
 app.get('/battle/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'battle.html'));
@@ -576,6 +581,33 @@ app.get('/api/archive/user', requireAuth, (req, res) => {
       ORDER BY created_at DESC
     `).all(req.user.id);
     res.json(battles);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get public profile by username
+app.get('/api/profile/:username', (req, res) => {
+  if (!db) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
+  try {
+    const user = db.prepare(`
+      SELECT id, username, name, avatar_url FROM users WHERE username = ?
+    `).get(req.params.username);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const battles = db.prepare(`
+      SELECT * FROM published_battles 
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `).all(user.id);
+    
+    res.json({ user, battles });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
