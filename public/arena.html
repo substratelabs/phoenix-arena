@@ -20,33 +20,55 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     .app { height: 100vh; display: flex; flex-direction: column; padding: 1rem; gap: 1rem; max-width: 1800px; margin: 0 auto; }
 
-    header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; margin-bottom: 0.5rem; }
-    .logo, .nav .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
-    .logo:hover, .nav .logo:hover { color: var(--accent2); }
-    .nav { display: flex; align-items: center; gap: 1.5rem; }
-    .nav a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .nav a:hover { color: var(--text); }
-    .nav a.active { color: var(--accent); }
-    .header-center { flex: 1; display: flex; justify-content: center; padding: 0 1rem; }
-    .battle-title-input { background: transparent; border: 1px solid transparent; color: var(--text); padding: 0.3rem 0.6rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: center; width: 200px; }
-    .battle-title-input:hover { border-color: var(--border); }
+    /* Navigation - Universal Header */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 11, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    .logo:hover { color: var(--accent2); }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-auth { display: flex; align-items: center; gap: 0.75rem; }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg); }
+    .login-btn svg { width: 16px; height: 16px; }
+    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); transition: color 0.2s; font-size: 0.85rem; }
+    .user-link:hover { color: var(--text); }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
+    .user-link:hover .user-avatar { border-color: var(--accent); }
+    
+    /* Arena Controls Bar */
+    .arena-controls { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0.75rem 0; 
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .arena-controls-left { display: flex; align-items: center; gap: 0.75rem; }
+    .arena-controls-right { display: flex; align-items: center; gap: 0.75rem; }
+    .battle-title-input { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; width: 250px; }
     .battle-title-input:focus { border-color: var(--accent); outline: none; background: var(--surface); }
     .battle-title-input::placeholder { color: var(--text3); }
-    .header-right { display: flex; align-items: center; gap: 0.75rem; }
     .status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text2); }
     .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
     .header-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
     .header-btn:hover { border-color: var(--text3); color: var(--text); }
     .header-btn.active { border-color: var(--accent); color: var(--accent); }
-
-    .user-menu { display: flex; align-items: center; gap: 0.5rem; }
-    .user-avatar { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); }
-    .user-name { font-size: 0.85rem; color: var(--text2); }
-    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
-    .login-btn:hover { background: var(--accent); color: var(--bg); }
-    .login-btn svg { width: 14px; height: 14px; }
-    .logout-btn { background: none; border: none; color: var(--text3); font-size: 0.75rem; cursor: pointer; padding: 0.2rem 0.4rem; transition: color 0.2s; }
-    .logout-btn:hover { color: var(--text2); }
 
     .panel { display: none; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; }
     .panel.open { display: block; }
@@ -208,39 +230,43 @@
     .persist-btn { font-size: 0.55rem; padding: 0.25rem 0.4rem; white-space: nowrap; }
     .persist-btn:hover { border-color: var(--accent); color: var(--accent); }
     .empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 0.75rem; }
+    .app { padding-top: 4rem; }
     @media (max-width: 1000px) { .setup { flex-direction: column; } .arena { flex-direction: column; } .divider { flex-direction: row; width: 100%; height: 40px; } .agent-panel { min-height: 200px; } .settings-grid { flex-direction: column; } .endpoint-input input { min-width: 180px; } }
   </style>
 </head>
 <body>
+  <nav>
+    <a href="/" class="logo">PHOENIX ARENA</a>
+    <div class="nav-links">
+      <a href="/arena" class="active">Arena</a>
+      <a href="/builder">Builder</a>
+      <a href="/archive">Archive</a>
+      <a href="/guide">Guide</a>
+      <a href="/dashboard">Dashboard</a>
+    </div>
+    <div class="nav-auth" id="navAuth">
+      <a href="/auth/github" class="login-btn" id="loginBtn">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Sign in
+      </a>
+      <a href="/dashboard" class="user-link" id="userLink" style="display:none">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span id="userName"></span>
+      </a>
+    </div>
+  </nav>
+  
   <div class="app">
-    <header>
-      <nav class="nav">
-        <a href="/" class="logo">PHOENIX ARENA</a>
-        <a href="/arena" class="active">Arena</a>
-        <a href="/builder">Builder</a>
-        <a href="/archive">Archive</a>
-        <a href="/guide">Guide</a>
-      </nav>
-      <div class="header-center">
+    <div class="arena-controls">
+      <div class="arena-controls-left">
         <input type="text" id="battleTitle" class="battle-title-input" placeholder="Battle title...">
-      </div>
-      <div class="header-right">
         <div class="status"><div class="dot" id="statusDot"></div><span id="statusText">Connected</span></div>
+      </div>
+      <div class="arena-controls-right">
         <button class="header-btn" id="presetsBtn">Presets</button>
         <button class="header-btn" id="settingsBtn">Providers</button>
-        <div id="authContainer">
-          <a class="login-btn" href="/auth/github" id="loginBtn">
-            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            Sign in
-          </a>
-          <div class="user-menu" id="userMenu" style="display:none">
-            <img class="user-avatar" id="userAvatar" src="" alt="">
-            <span class="user-name" id="userName"></span>
-            <button class="logout-btn" id="logoutBtn">Logout</button>
-          </div>
-        </div>
       </div>
-    </header>
+    </div>
 
     <div class="panel" id="presetsPanel">
       <h3>Saved Agent Presets</h3>
@@ -490,14 +516,16 @@
     }
 
     function updateAuthUI(user) {
+      const loginBtn = $('loginBtn');
+      const userLink = $('userLink');
       if (user) {
-        $('loginBtn').style.display = 'none';
-        $('userMenu').style.display = 'flex';
+        loginBtn.style.display = 'none';
+        userLink.style.display = 'flex';
         $('userAvatar').src = user.avatar_url || '';
         $('userName').textContent = user.username || 'User';
       } else {
-        $('loginBtn').style.display = 'flex';
-        $('userMenu').style.display = 'none';
+        loginBtn.style.display = 'flex';
+        userLink.style.display = 'none';
       }
     }
 
@@ -506,7 +534,7 @@
       authToken = null;
       currentUser = null;
       updateAuthUI(null);
-      presets = {};
+      presets = {};;
       loadLocalPresets();
       updatePresetsList();
     }
@@ -1062,7 +1090,7 @@
     $('exportBrain1').onclick = () => exportBrain(1);
     $('exportBrain2').onclick = () => exportBrain(2);
     $('publishBtn').onclick = publishToArchive;
-    $('logoutBtn').onclick = logout;
+    // Logout handled in dashboard now
     $('resetBtn').onclick = resetArena;
     
     function mainButtonClick() {
