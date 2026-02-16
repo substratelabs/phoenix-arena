@@ -8,6 +8,7 @@ const cors = require('cors');
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 const { Arena, setupDatabase } = require('./arena');
 
@@ -16,6 +17,12 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'phoenix-arena-dev-secret-change-in-prod';
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fsSync.existsSync(uploadsDir)) {
+  fsSync.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json());
@@ -655,6 +662,62 @@ app.post('/api/profile/update', requireAuth, (req, res) => {
     }
     
     db.prepare('UPDATE users SET name = ?, username = ?, bio = ? WHERE id = ?').run(name, username, bio, req.user.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Avatar upload (base64)
+app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (req, res) => {
+  try {
+    const { avatar } = req.body;
+    
+    if (!avatar || !avatar.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Invalid image data' });
+    }
+    
+    // Extract base64 data
+    const matches = avatar.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Invalid image format' });
+    }
+    
+    const ext = matches[1];
+    const data = matches[2];
+    const buffer = Buffer.from(data, 'base64');
+    
+    // Check file size (2MB max)
+    if (buffer.length > 2 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Image must be under 2MB' });
+    }
+    
+    // Save file
+    const filename = `avatar_${req.user.id}_${Date.now()}.${ext}`;
+    const filepath = path.join(uploadsDir, filename);
+    fsSync.writeFileSync(filepath, buffer);
+    
+    // Update user avatar_url
+    const avatarUrl = `/uploads/${filename}`;
+    db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(avatarUrl, req.user.id);
+    
+    res.json({ success: true, avatar_url: avatarUrl });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Save API key to profile
+app.post('/api/profile/apikey', requireAuth, (req, res) => {
+  const { apiKey } = req.body;
+  
+  try {
+    // Add api_key column if not exists
+    try {
+      db.exec('ALTER TABLE users ADD COLUMN api_key TEXT');
+    } catch (e) {} // Column might already exist
+    
+    db.prepare('UPDATE users SET api_key = ? WHERE id = ?').run(apiKey || null, req.user.id);
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
