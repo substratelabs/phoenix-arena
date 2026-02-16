@@ -28,18 +28,18 @@
       overflow-x: hidden;
     }
 
-    /* Navigation */
+    /* Navigation - Standardized */
     nav {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 1000;
-      padding: 1.5rem 3rem;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(10, 10, 11, 0.8);
+      background: rgba(10, 10, 11, 0.9);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid transparent;
       transition: border-color 0.3s;
@@ -47,16 +47,17 @@
     nav.scrolled { border-color: var(--border); }
     .logo {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--accent);
-      letter-spacing: 0.1em;
+      letter-spacing: 0.05em;
       text-decoration: none;
     }
+    .logo:hover { color: var(--accent2); }
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 2rem;
+      gap: 1.5rem;
     }
     .nav-links a {
       color: var(--text2);
@@ -65,6 +66,7 @@
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
     .nav-links .login-link {
       color: var(--accent);
       border: 1px solid var(--accent);
@@ -542,7 +544,8 @@
       <a href="/arena">Arena</a>
       <a href="/builder">Builder</a>
       <a href="/archive">Archive</a>
-      <a href="https://github.com/shipstars/phoenix-arena" target="_blank">GitHub</a>
+      <a href="/guide">Guide</a>
+      <a href="https://github.com/substrate-labs/phoenix-arena" target="_blank">GitHub</a>
     </div>
     <p class="copyright">Phoenix Arena © 2025 · A SUBSTRATE Project</p>
   </footer>

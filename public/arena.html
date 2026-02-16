@@ -20,11 +20,11 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     .app { height: 100vh; display: flex; flex-direction: column; padding: 1rem; gap: 1rem; max-width: 1800px; margin: 0 auto; }
 
-    header { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; margin-bottom: 0.5rem; }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
     .nav { display: flex; align-items: center; gap: 1.5rem; }
-    .nav a { color: var(--text2); text-decoration: none; font-size: 0.8rem; }
+    .nav a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav a:hover { color: var(--text); }
     .nav a.active { color: var(--accent); }
     .header-center { flex: 1; display: flex; justify-content: center; padding: 0 1rem; }
@@ -35,17 +35,17 @@
     .header-right { display: flex; align-items: center; gap: 0.75rem; }
     .status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text2); }
     .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
-    .header-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.7rem; cursor: pointer; }
-    .header-btn:hover { border-color: var(--text3); }
+    .header-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+    .header-btn:hover { border-color: var(--text3); color: var(--text); }
     .header-btn.active { border-color: var(--accent); color: var(--accent); }
 
     .user-menu { display: flex; align-items: center; gap: 0.5rem; }
     .user-avatar { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); }
-    .user-name { font-size: 0.7rem; color: var(--text2); }
-    .login-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
-    .login-btn:hover { border-color: var(--text3); color: var(--text); }
+    .user-name { font-size: 0.85rem; color: var(--text2); }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg); }
     .login-btn svg { width: 14px; height: 14px; }
-    .logout-btn { background: none; border: none; color: var(--text3); font-size: 0.65rem; cursor: pointer; padding: 0.2rem 0.4rem; }
+    .logout-btn { background: none; border: none; color: var(--text3); font-size: 0.75rem; cursor: pointer; padding: 0.2rem 0.4rem; transition: color 0.2s; }
     .logout-btn:hover { color: var(--text2); }
 
     .panel { display: none; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; }

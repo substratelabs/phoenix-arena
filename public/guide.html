@@ -22,16 +22,48 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     
-    /* Nav */
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: var(--surface); }
-    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
-    .nav-links { display: flex; gap: 1.5rem; }
+    /* Navigation - Standardized */
+    nav { 
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 1rem 2rem; 
+      background: rgba(10, 10, 11, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); 
+    }
+    .logo { 
+      font-family: 'JetBrains Mono', monospace; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      color: var(--accent); 
+      text-decoration: none; 
+      letter-spacing: 0.05em; 
+    }
+    .logo:hover { color: var(--accent2); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
     .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
     .nav-links a.active { color: var(--accent); }
+    .nav-links .login-link {
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+    }
+    .nav-links .login-link:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
     
     /* Content */
-    .content { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
+    .content { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; padding-top: 6rem; }
     h1 { font-family: 'JetBrains Mono', monospace; font-size: 2rem; margin-bottom: 0.5rem; }
     .subtitle { color: var(--text2); margin-bottom: 3rem; }
     
@@ -72,6 +104,7 @@
       <a href="/builder">Builder</a>
       <a href="/archive">Archive</a>
       <a href="/guide" class="active">Guide</a>
+      <a href="/auth/github" class="login-link" id="loginLink">Sign in</a>
     </div>
   </nav>
 
@@ -231,6 +264,26 @@ Never claim certainty. Always leave room for doubt.</pre>
     document.querySelectorAll('.faq-question').forEach(q => {
       q.onclick = () => q.parentElement.classList.toggle('open');
     });
+    
+    // Auth handling
+    (function() {
+      const token = localStorage.getItem('phoenix_token');
+      const loginLink = document.getElementById('loginLink');
+      
+      if (token && loginLink) {
+        fetch('/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.user) {
+            loginLink.textContent = data.user.username || 'Dashboard';
+            loginLink.href = '/arena';
+          }
+        })
+        .catch(() => {});
+      }
+    })();
   </script>
 </body>
 </html>
