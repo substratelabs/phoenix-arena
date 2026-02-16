@@ -211,7 +211,27 @@ app.get('/auth/github/callback', async (req, res) => {
 // Get current user
 app.get('/auth/me', (req, res) => {
   if (req.user) {
-    res.json({ user: req.user });
+    // Get followers/following counts
+    let followers_count = 0;
+    let following_count = 0;
+    
+    try {
+      const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='follows'").get();
+      if (tableExists) {
+        const fc = db.prepare('SELECT COUNT(*) as count FROM follows WHERE following_id = ?').get(req.user.id);
+        const fg = db.prepare('SELECT COUNT(*) as count FROM follows WHERE follower_id = ?').get(req.user.id);
+        followers_count = fc?.count || 0;
+        following_count = fg?.count || 0;
+      }
+    } catch (e) {}
+    
+    res.json({ 
+      user: {
+        ...req.user,
+        followers_count,
+        following_count
+      }
+    });
   } else {
     res.json({ user: null });
   }
@@ -237,10 +257,16 @@ function setupUserTable() {
         username TEXT NOT NULL,
         avatar_url TEXT,
         name TEXT,
+        bio TEXT,
         created_at INTEGER DEFAULT (strftime('%s', 'now')),
         updated_at INTEGER DEFAULT (strftime('%s', 'now'))
       )
     `);
+    
+    // Add bio column if not exists
+    try {
+      db.exec('ALTER TABLE users ADD COLUMN bio TEXT');
+    } catch (e) {} // Column might already exist
     
     db.exec(`
       CREATE TABLE IF NOT EXISTS user_presets (
@@ -608,6 +634,132 @@ app.get('/api/profile/:username', (req, res) => {
     `).all(user.id);
     
     res.json({ user, battles });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Update user profile
+app.post('/api/profile/update', requireAuth, (req, res) => {
+  const { name, username, bio } = req.body;
+  
+  if (!username || !username.match(/^[a-z0-9_]+$/)) {
+    return res.status(400).json({ error: 'Invalid username' });
+  }
+  
+  try {
+    // Check if username is taken by another user
+    const existing = db.prepare('SELECT id FROM users WHERE username = ? AND id != ?').get(username, req.user.id);
+    if (existing) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+    
+    db.prepare('UPDATE users SET name = ?, username = ?, bio = ? WHERE id = ?').run(name, username, bio, req.user.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get top users by battle count
+app.get('/api/users/top', (req, res) => {
+  if (!db) return res.json([]);
+  
+  try {
+    const users = db.prepare(`
+      SELECT u.id, u.username, u.name, u.avatar_url, COUNT(pb.id) as battle_count
+      FROM users u
+      LEFT JOIN published_battles pb ON u.id = pb.user_id
+      GROUP BY u.id
+      HAVING battle_count > 0
+      ORDER BY battle_count DESC
+      LIMIT 10
+    `).all();
+    res.json(users);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+// Get followers/following
+app.get('/api/users/:username/followers', (req, res) => {
+  if (!db) return res.json([]);
+  
+  try {
+    const user = db.prepare('SELECT id FROM users WHERE username = ?').get(req.params.username);
+    if (!user) return res.json([]);
+    
+    // Check if follows table exists, if not return empty
+    const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='follows'").get();
+    if (!tableExists) return res.json([]);
+    
+    const followers = db.prepare(`
+      SELECT u.id, u.username, u.name, u.avatar_url
+      FROM follows f
+      JOIN users u ON f.follower_id = u.id
+      WHERE f.following_id = ?
+    `).all(user.id);
+    res.json(followers);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+app.get('/api/users/:username/following', (req, res) => {
+  if (!db) return res.json([]);
+  
+  try {
+    const user = db.prepare('SELECT id FROM users WHERE username = ?').get(req.params.username);
+    if (!user) return res.json([]);
+    
+    const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='follows'").get();
+    if (!tableExists) return res.json([]);
+    
+    const following = db.prepare(`
+      SELECT u.id, u.username, u.name, u.avatar_url
+      FROM follows f
+      JOIN users u ON f.following_id = u.id
+      WHERE f.follower_id = ?
+    `).all(user.id);
+    res.json(following);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+// Follow/unfollow
+app.post('/api/users/:username/follow', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const targetUser = db.prepare('SELECT id FROM users WHERE username = ?').get(req.params.username);
+    if (!targetUser) return res.status(404).json({ error: 'User not found' });
+    if (targetUser.id === req.user.id) return res.status(400).json({ error: 'Cannot follow yourself' });
+    
+    // Create follows table if not exists
+    db.exec(`CREATE TABLE IF NOT EXISTS follows (
+      follower_id INTEGER,
+      following_id INTEGER,
+      created_at INTEGER DEFAULT (strftime('%s', 'now')),
+      PRIMARY KEY (follower_id, following_id)
+    )`);
+    
+    db.prepare('INSERT OR IGNORE INTO follows (follower_id, following_id) VALUES (?, ?)').run(req.user.id, targetUser.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/users/:username/unfollow', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const targetUser = db.prepare('SELECT id FROM users WHERE username = ?').get(req.params.username);
+    if (!targetUser) return res.status(404).json({ error: 'User not found' });
+    
+    db.prepare('DELETE FROM follows WHERE follower_id = ? AND following_id = ?').run(req.user.id, targetUser.id);
+    res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
