@@ -72,24 +72,76 @@
 
     .battle-header h1 {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 500;
       margin-bottom: 1rem;
+      color: var(--text);
     }
 
     .battle-meta {
       display: flex;
       flex-wrap: wrap;
-      
-    }
+      gap: 0.5rem;
       font-size: 0.8rem;
       color: var(--text3);
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
       align-items: center;
+    }
+    
+    .battle-meta span {
+      color: var(--text3);
     }
     
     .battle-meta .divider {
       color: var(--border);
+      margin: 0 0.25rem;
+    }
+
+    /* Agent Info Cards */
+    .agents-info {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .agent-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .agent-card.agent-0 { border-left: 3px solid var(--agent1); }
+    .agent-card.agent-1 { border-left: 3px solid var(--agent2); }
+    
+    .agent-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .agent-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .agent-card.agent-0 .agent-card-title { color: var(--agent1); }
+    .agent-card.agent-1 .agent-card-title { color: var(--agent2); }
+    
+    .agent-model {
+      font-size: 0.7rem;
+      color: var(--text3);
+      background: var(--surface2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .agent-card-name {
+      font-size: 0.9rem;
+      color: var(--text2);
     }
 
     .badge {
@@ -110,7 +162,7 @@
     
     .badge.soul {
       background: rgba(249, 115, 22, 0.15);
-      color: var(--accent) !important;
+      color: var(--accent);
       border: 1px solid rgba(249, 115, 22, 0.3);
     }
     
@@ -410,9 +462,18 @@
               <span>${battle.views || 0} views</span>
               ${battle.username ? `<span class="divider">·</span><span class="author-line">by <a href="/profile/${escapeHtml(battle.username)}" class="author-link">${escapeHtml(battle.username)}</a></span>` : ''}
             </div>
-            <div class="battle-config">
-              ${agentBadges}
-            </div>
+          </div>
+          
+          <div class="agents-info">
+            ${Object.entries(agentModels).map(([agent, model], idx) => `
+              <div class="agent-card agent-${idx}">
+                <div class="agent-card-header">
+                  <span class="agent-card-title">Agent ${idx + 1}</span>
+                  <span class="agent-model">${model}</span>
+                </div>
+                <div class="agent-card-name">${escapeHtml(agent)}</div>
+              </div>
+            `).join('')}
           </div>
           
           ${battle.prompt ? `

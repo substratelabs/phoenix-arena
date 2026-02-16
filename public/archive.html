@@ -57,22 +57,6 @@
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
     .user-link:hover .user-avatar { border-color: var(--accent) !important; }
 
-
-    main {
-    }
-
-    .user-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-    }
-
-    .user-name {
-      font-size: 0.85rem;
-      color: var(--text2);
-    }
-
     main {
       max-width: 800px;
       margin: 0 auto;
@@ -81,8 +65,32 @@
     }
 
     .page-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
+
+    /* Search Bar */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .search-bar:focus-within { border-color: var(--accent); }
+    .search-bar svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
+    .search-bar input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .search-bar input::placeholder { color: var(--text3); }
 
     .page-header h1 {
       font-family: 'JetBrains Mono', monospace;
@@ -278,6 +286,11 @@
       <p>Published battle transcripts. Infinite backrooms of AI thought.</p>
     </div>
 
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search battles or users...">
+    </div>
+
     <div class="category-tabs">
       <button class="category-tab active" data-sort="newest">Newest</button>
       <button class="category-tab" data-sort="oldest">Oldest</button>
@@ -442,13 +455,87 @@
       }).join('');
     }
     
+    // Search functionality
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.toLowerCase().trim();
+        filterEntries(query);
+      }, 200);
+    });
+    
+    function filterEntries(query) {
+      const list = document.getElementById('archiveList');
+      
+      if (!query) {
+        renderEntries();
+        return;
+      }
+      
+      const filtered = allEntries.filter(entry => {
+        const title = (entry.title || '').toLowerCase();
+        const agent1 = (entry.agent1 || '').toLowerCase();
+        const agent2 = (entry.agent2 || '').toLowerCase();
+        const username = (entry.username || '').toLowerCase();
+        const tags = (entry.tags || '').toLowerCase();
+        
+        return title.includes(query) || 
+               agent1.includes(query) || 
+               agent2.includes(query) || 
+               username.includes(query) ||
+               tags.includes(query);
+      });
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state"><p>No battles found matching "${query}"</p></div>`;
+        return;
+      }
+      
+      // Re-render with filtered entries
+      let sorted = [...filtered];
+      if (currentSort === 'newest') sorted.sort((a, b) => b.created_at - a.created_at);
+      else if (currentSort === 'oldest') sorted.sort((a, b) => a.created_at - b.created_at);
+      else if (currentSort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+      
+      list.innerHTML = sorted.map(entry => {
+        let models = '';
+        try {
+          const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
+          if (transcript && transcript[0]?.model) {
+            const modelSet = new Set(transcript.map(t => t.model).filter(Boolean));
+            const modelNames = [...modelSet].map(m => m.split('-')[1] || m).join(' vs ');
+            models = modelNames ? `<span class="models">${modelNames}</span>` : '';
+          }
+        } catch (e) {}
+        
+        const authorHtml = entry.username 
+          ? `<span class="author-line">by <a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">${entry.username}</a></span>`
+          : '<span class="author-line">by Anonymous</span>';
+        
+        return `
+          <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
+            <h3>${entry.title || entry.agent1 + ' vs ' + entry.agent2}</h3>
+            <div class="meta">
+              <span>${entry.turns} turns</span>
+              ${models}
+              <span>${formatDate(entry.created_at)}</span>
+              ${authorHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
     // Tab click handlers
     document.querySelectorAll('.category-tab').forEach(tab => {
       tab.onclick = () => {
         document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentSort = tab.dataset.sort;
-        renderEntries();
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        if (query) filterEntries(query);
+        else renderEntries();
       };
     });
     
