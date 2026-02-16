@@ -35,11 +35,12 @@
       left: 0;
       right: 0;
       z-index: 1000;
-      padding: 1rem 2rem;
+      height: 56px;
+      padding: 0 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(10, 10, 11, 0.9);
+      background: rgba(10, 10, 11, 0.95);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid transparent;
       transition: border-color 0.3s;
@@ -73,26 +74,22 @@
     .nav-auth {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
     }
     
     .login-btn {
-      color: var(--accent);
+      background: transparent;
       border: 1px solid var(--accent);
+      color: var(--accent);
       padding: 0.4rem 0.8rem;
       border-radius: 0.25rem;
-      transition: all 0.2s;
-      display: inline-flex;
+      font-size: 0.85rem;
+      display: flex;
       align-items: center;
       gap: 0.4rem;
       text-decoration: none;
-      font-size: 0.85rem;
-      background: transparent;
+      transition: all 0.2s;
     }
-    .login-btn svg {
-      width: 16px;
-      height: 16px;
-    }
+    .login-btn svg { width: 16px; height: 16px; }
     .login-btn:hover {
       background: var(--accent);
       color: var(--bg);
@@ -104,8 +101,8 @@
       gap: 0.5rem;
       text-decoration: none;
       color: var(--text2);
-      transition: color 0.2s;
       font-size: 0.85rem;
+      transition: color 0.2s;
     }
     .user-link:hover { color: var(--text); }
     .user-avatar {
@@ -623,19 +620,19 @@
       
       // Update nav if logged in
       const savedToken = localStorage.getItem('phoenix_token');
-      const loginLink = document.getElementById('loginLink');
+      const loginBtn = document.getElementById('loginBtn');
       const userLink = document.getElementById('userLink');
       const userAvatar = document.getElementById('userAvatar');
       const userName = document.getElementById('userName');
       
-      if (savedToken && loginLink) {
+      if (savedToken && loginBtn) {
         fetch('/auth/me', {
           headers: { 'Authorization': `Bearer ${savedToken}` }
         })
         .then(res => res.json())
         .then(data => {
           if (data.user) {
-            loginLink.style.display = 'none';
+            loginBtn.style.display = 'none';
             userLink.style.display = 'flex';
             userAvatar.src = data.user.avatar_url || '';
             userName.textContent = data.user.username || 'Dashboard';

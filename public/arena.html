@@ -27,11 +27,12 @@
       left: 0;
       right: 0;
       z-index: 1000;
-      padding: 1rem 2rem;
+      height: 56px;
+      padding: 0 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(10, 10, 11, 0.9);
+      background: rgba(10, 10, 11, 0.95);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
@@ -41,11 +42,11 @@
     .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
     .nav-links a.active { color: var(--accent); }
-    .nav-auth { display: flex; align-items: center; gap: 0.75rem; }
-    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .nav-auth { display: flex; align-items: center; }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
     .login-btn:hover { background: var(--accent); color: var(--bg); }
     .login-btn svg { width: 16px; height: 16px; }
-    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); transition: color 0.2s; font-size: 0.85rem; }
+    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
     .user-link:hover .user-avatar { border-color: var(--accent); }
