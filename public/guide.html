@@ -278,7 +278,7 @@ Never claim certainty. Always leave room for doubt.</pre>
         .then(data => {
           if (data.user) {
             loginLink.textContent = data.user.username || 'Dashboard';
-            loginLink.href = '/arena';
+            loginLink.href = '/dashboard';
           }
         })
         .catch(() => {});
