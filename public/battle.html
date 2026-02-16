@@ -44,20 +44,20 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent) !important; letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
-    .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); }
-    .nav-links a.active { color: var(--accent); }
-    .nav-auth { display: flex; align-items: center; }
-    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
-    .login-btn:hover { background: var(--accent); color: var(--bg); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .nav-right a.active { color: var(--accent) !important; }
+    
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
     .login-btn svg { width: 16px; height: 16px; }
     .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
-    .user-link:hover .user-avatar { border-color: var(--accent); }
+    .user-link:hover .user-avatar { border-color: var(--accent) !important; }
 
     main {
       max-width: 900px;
@@ -110,7 +110,7 @@
     
     .badge.soul {
       background: rgba(249, 115, 22, 0.15);
-      color: var(--accent);
+      color: var(--accent) !important;
       border: 1px solid rgba(249, 115, 22, 0.3);
     }
     
@@ -126,8 +126,17 @@
       border: 1px solid rgba(168, 85, 247, 0.3);
     }
     
-    .author {
-      color: var(--accent);
+    .author-line {
+      color: var(--text3);
+    }
+    .author-link {
+      color: var(--text3);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .author-link:hover {
+      color: var(--text);
+      text-decoration: underline;
     }
 
     .battle-config {
@@ -248,7 +257,7 @@
     }
 
     .error a {
-      color: var(--accent);
+      color: var(--accent) !important;
       text-decoration: none;
     }
 
@@ -273,7 +282,7 @@
       text-decoration: none;
     }
 
-    footer a:hover { color: var(--accent); }
+    footer a:hover { color: var(--accent) !important; }
     
     /* Back link */
     .back-link {
@@ -292,7 +301,7 @@
 <body>
   <nav>
     <a href="/" class="logo">PHOENIX ARENA</a>
-    <div class="nav-links">
+    <div class="nav-right">
       <a href="/arena">Arena</a>
       <a href="/builder">Builder</a>
       <a href="/archive" class="active">Archive</a>
@@ -401,7 +410,7 @@
               <span>${formatDate(battle.created_at)}</span>
               <span class="divider">·</span>
               <span>${battle.views || 0} views</span>
-              ${battle.username ? `<span class="divider">·</span><span class="author">by ${escapeHtml(battle.username)}</span>` : ''}
+              ${battle.username ? `<span class="divider">·</span><span class="author-line">by <a href="/profile/${escapeHtml(battle.username)}" class="author-link">${escapeHtml(battle.username)}</a></span>` : ''}
             </div>
             <div class="battle-config">
               ${agentBadges}

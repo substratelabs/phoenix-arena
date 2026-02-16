@@ -42,20 +42,20 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent) !important; letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
-    .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); }
-    .nav-links a.active { color: var(--accent); }
-    .nav-auth { display: flex; align-items: center; }
-    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
-    .login-btn:hover { background: var(--accent); color: var(--bg); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .nav-right a.active { color: var(--accent) !important; }
+    
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
     .login-btn svg { width: 16px; height: 16px; }
     .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
-    .user-link:hover .user-avatar { border-color: var(--accent); }
+    .user-link:hover .user-avatar { border-color: var(--accent) !important; }
 
 
     main {
@@ -173,7 +173,7 @@
     }
 
     .empty-state a {
-      color: var(--accent);
+      color: var(--accent) !important;
       text-decoration: none;
     }
 
@@ -205,7 +205,7 @@
       text-decoration: none;
     }
 
-    footer a:hover { color: var(--accent); }
+    footer a:hover { color: var(--accent) !important; }
     
     /* Category tabs */
     .category-tabs {
@@ -227,12 +227,21 @@
       transition: all 0.2s;
     }
     .category-tab:hover { border-color: var(--text3); color: var(--text); }
-    .category-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .category-tab.active { background: var(--accent); border-color: var(--accent) !important; color: var(--bg) !important; }
     
-    /* Author badge */
-    .author {
-      color: var(--accent);
+    /* Author styling */
+    .author-line {
+      color: var(--text3);
       font-size: 0.75rem;
+    }
+    .author-link {
+      color: var(--text3);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .author-link:hover {
+      color: var(--text);
+      text-decoration: underline;
     }
     .models {
       color: var(--text2);
@@ -246,7 +255,7 @@
 <body>
   <nav>
     <a href="/" class="logo">PHOENIX ARENA</a>
-    <div class="nav-links">
+    <div class="nav-right">
       <a href="/arena">Arena</a>
       <a href="/builder">Builder</a>
       <a href="/archive" class="active">Archive</a>
@@ -415,6 +424,10 @@
           }
         } catch (e) {}
         
+        const authorHtml = entry.username 
+          ? `<span class="author-line">by <a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">${entry.username}</a></span>`
+          : '<span class="author-line">by Anonymous</span>';
+        
         return `
           <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
             <h3>${entry.title || entry.agent1 + ' vs ' + entry.agent2}</h3>
@@ -422,7 +435,7 @@
               <span>${entry.turns} turns</span>
               ${models}
               <span>${formatDate(entry.created_at)}</span>
-              <span class="author">by ${entry.username || 'Anonymous'}</span>
+              ${authorHtml}
             </div>
             <div class="preview">${entry.preview || ''}</div>
             ${entry.tags ? `<div class="tags">${entry.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div>` : ''}
