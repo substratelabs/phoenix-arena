@@ -29,8 +29,8 @@
       min-height: 100vh;
     }
 
-    /* Navigation - Standardized */
-    header {
+    /* Navigation - Universal Header */
+    nav {
       position: fixed;
       top: 0;
       left: 0;
@@ -44,32 +44,20 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-
-    .logo {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 0.05em;
-      text-decoration: none;
-    }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .nav a {
-      color: var(--text2);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.2s;
-    }
-
-    .nav a:hover { color: var(--text); }
-    .nav a.active { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-auth { display: flex; align-items: center; gap: 0.75rem; }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg); }
+    .login-btn svg { width: 16px; height: 16px; }
+    .nav-user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); transition: color 0.2s; font-size: 0.85rem; }
+    .nav-user-link:hover { color: var(--text); }
+    .nav-user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
+    .nav-user-link:hover .nav-user-avatar { border-color: var(--accent); }
 
     main {
       max-width: 900px;
@@ -337,16 +325,19 @@
   </style>
 </head>
 <body>
-  <header>
+  <nav>
     <a href="/" class="logo">PHOENIX ARENA</a>
-    <nav class="nav">
+    <div class="nav-links">
       <a href="/arena">Arena</a>
       <a href="/builder">Builder</a>
       <a href="/archive">Archive</a>
       <a href="/guide">Guide</a>
       <a href="/dashboard" class="active">Dashboard</a>
-    </nav>
-  </header>
+    </div>
+    <div class="nav-auth" id="navAuth">
+      <!-- Dashboard shows user avatar when logged in, handled by JS -->
+    </div>
+  </nav>
 
   <main id="main">
     <div class="login-prompt" id="loginPrompt">

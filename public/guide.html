@@ -22,7 +22,7 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     
-    /* Navigation - Standardized */
+    /* Navigation - Universal Header */
     nav { 
       position: fixed;
       top: 0;
@@ -37,30 +37,20 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border); 
     }
-    .logo { 
-      font-family: 'JetBrains Mono', monospace; 
-      font-size: 1rem; 
-      font-weight: 600; 
-      color: var(--accent); 
-      text-decoration: none; 
-      letter-spacing: 0.05em; 
-    }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); text-decoration: none; letter-spacing: 0.05em; }
     .logo:hover { color: var(--accent2); }
     .nav-links { display: flex; gap: 1.5rem; align-items: center; }
     .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
     .nav-links a.active { color: var(--accent); }
-    .nav-links .login-link {
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      padding: 0.4rem 0.8rem;
-      border-radius: 0.25rem;
-      transition: all 0.2s;
-    }
-    .nav-links .login-link:hover {
-      background: var(--accent);
-      color: var(--bg);
-    }
+    .nav-auth { display: flex; align-items: center; gap: 0.75rem; }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg); }
+    .login-btn svg { width: 16px; height: 16px; }
+    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); transition: color 0.2s; font-size: 0.85rem; }
+    .user-link:hover { color: var(--text); }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
+    .user-link:hover .user-avatar { border-color: var(--accent); }
     
     /* Content */
     .content { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; padding-top: 6rem; }
@@ -104,7 +94,17 @@
       <a href="/builder">Builder</a>
       <a href="/archive">Archive</a>
       <a href="/guide" class="active">Guide</a>
-      <a href="/auth/github" class="login-link" id="loginLink">Sign in</a>
+      <a href="/dashboard">Dashboard</a>
+    </div>
+    <div class="nav-auth" id="navAuth">
+      <a href="/auth/github" class="login-btn" id="loginBtn">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Sign in
+      </a>
+      <a href="/dashboard" class="user-link" id="userLink" style="display:none">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span id="userName"></span>
+      </a>
     </div>
   </nav>
 
@@ -269,6 +269,9 @@ Never claim certainty. Always leave room for doubt.</pre>
     (function() {
       const token = localStorage.getItem('phoenix_token');
       const loginLink = document.getElementById('loginLink');
+      const userLink = document.getElementById('userLink');
+      const userAvatar = document.getElementById('userAvatar');
+      const userName = document.getElementById('userName');
       
       if (token && loginLink) {
         fetch('/auth/me', {
@@ -277,8 +280,10 @@ Never claim certainty. Always leave room for doubt.</pre>
         .then(res => res.json())
         .then(data => {
           if (data.user) {
-            loginLink.textContent = data.user.username || 'Dashboard';
-            loginLink.href = '/dashboard';
+            loginLink.style.display = 'none';
+            userLink.style.display = 'flex';
+            userAvatar.src = data.user.avatar_url || '';
+            userName.textContent = data.user.username || 'Dashboard';
           }
         })
         .catch(() => {});
