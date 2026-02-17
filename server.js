@@ -217,28 +217,44 @@ app.get('/auth/github/callback', async (req, res) => {
 
 // Get current user
 app.get('/auth/me', (req, res) => {
-  if (req.user) {
-    // Get followers/following counts
-    let followers_count = 0;
-    let following_count = 0;
-    
+  if (req.user && db) {
     try {
-      const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='follows'").get();
-      if (tableExists) {
-        const fc = db.prepare('SELECT COUNT(*) as count FROM follows WHERE following_id = ?').get(req.user.id);
-        const fg = db.prepare('SELECT COUNT(*) as count FROM follows WHERE follower_id = ?').get(req.user.id);
-        followers_count = fc?.count || 0;
-        following_count = fg?.count || 0;
+      // Fetch fresh user data from database
+      const freshUser = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+      
+      if (!freshUser) {
+        return res.json({ user: null });
       }
-    } catch (e) {}
-    
-    res.json({ 
-      user: {
-        ...req.user,
-        followers_count,
-        following_count
-      }
-    });
+      
+      // Get followers/following counts
+      let followers_count = 0;
+      let following_count = 0;
+      
+      try {
+        const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='follows'").get();
+        if (tableExists) {
+          const fc = db.prepare('SELECT COUNT(*) as count FROM follows WHERE following_id = ?').get(freshUser.id);
+          const fg = db.prepare('SELECT COUNT(*) as count FROM follows WHERE follower_id = ?').get(freshUser.id);
+          followers_count = fc?.count || 0;
+          following_count = fg?.count || 0;
+        }
+      } catch (e) {}
+      
+      res.json({ 
+        user: {
+          id: freshUser.id,
+          username: freshUser.username,
+          name: freshUser.name,
+          avatar_url: freshUser.avatar_url,
+          bio: freshUser.bio,
+          api_key: freshUser.api_key,
+          followers_count,
+          following_count
+        }
+      });
+    } catch (e) {
+      res.json({ user: null });
+    }
   } else {
     res.json({ user: null });
   }
@@ -822,6 +838,22 @@ app.post('/api/users/:username/unfollow', requireAuth, (req, res) => {
     if (!targetUser) return res.status(404).json({ error: 'User not found' });
     
     db.prepare('DELETE FROM follows WHERE follower_id = ? AND following_id = ?').run(req.user.id, targetUser.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete a battle
+app.delete('/api/archive/:id', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const battle = db.prepare('SELECT * FROM published_battles WHERE id = ?').get(parseInt(req.params.id));
+    if (!battle) return res.status(404).json({ error: 'Battle not found' });
+    if (battle.user_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+    
+    db.prepare('DELETE FROM published_battles WHERE id = ?').run(battle.id);
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
