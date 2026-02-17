@@ -48,6 +48,11 @@
     .nav-right a:hover { color: var(--text); }
     .nav-right a.active { color: var(--accent) !important; }
     
+    .notif-btn { position: relative; background: none; border: none; color: var(--text2); cursor: pointer; padding: 0.4rem; transition: color 0.2s; }
+    .notif-btn:hover { color: var(--text); }
+    .notif-btn svg { width: 20px; height: 20px; }
+    .notif-badge { position: absolute; top: 0; right: 0; background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 600; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    
     .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
     .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
     .login-btn svg { width: 16px; height: 16px; }
@@ -135,6 +140,10 @@
       <a href="/archive">Archive</a>
       <a href="/guide">Guide</a>
       <a href="/dashboard">Dashboard</a>
+      <button class="notif-btn" id="notifBtn" style="display:none" onclick="window.location='/dashboard'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
       <a href="/auth/github" class="login-btn" id="loginBtn">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         Sign in
@@ -541,11 +550,26 @@
             userLink.style.display = 'flex';
             userAvatar.src = data.user.avatar_url || '';
             userName.textContent = data.user.username || 'Dashboard';
+            document.getElementById('notifBtn').style.display = 'block';
+            loadNotifCount();
           }
         })
         .catch(() => {});
       }
     })();
+    
+    async function loadNotifCount() {
+      const token = localStorage.getItem('phoenix_token');
+      if (!token) return;
+      try {
+        const res = await fetch('/api/notifications/unread', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.count > 0) {
+          document.getElementById('notifBadge').textContent = data.count > 99 ? '99+' : data.count;
+          document.getElementById('notifBadge').style.display = 'flex';
+        }
+      } catch (e) {}
+    }
     
     // Input listeners
     document.querySelectorAll('input, textarea').forEach(el => {
