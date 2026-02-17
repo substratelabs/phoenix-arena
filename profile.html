@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Phoenix Arena</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --surface2: #18181b;
+      --border: #27272a;
+      --text: #fafafa;
+      --text2: #a1a1aa;
+      --text3: #52525b;
+      --accent: #f97316;
+      --accent2: #fb923c;
+    }
+    
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    .logo:hover { color: var(--accent2); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .nav-right a.active { color: var(--accent); }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
+    .login-btn svg { width: 16px; height: 16px; }
+    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
+    .user-link:hover { color: var(--text); }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; object-fit: cover; }
+    .user-link:hover .user-avatar { border-color: var(--accent); }
+
+    .notif-btn { position: relative; background: none; border: none; color: var(--text2); cursor: pointer; padding: 0.4rem; transition: color 0.2s; }
+    .notif-btn:hover { color: var(--text); }
+    .notif-btn svg { width: 20px; height: 20px; }
+    .notif-badge { position: absolute; top: 0; right: 0; background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 600; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
+    main { max-width: 700px; margin: 0 auto; padding: 2rem; padding-top: 5rem; }
+
+    .profile-header { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: var(--surface); }
+    .profile-info { flex: 1; }
+    .profile-info h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .username { color: var(--text3); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .profile-bio { color: var(--text2); font-size: 0.85rem; margin-bottom: 0.75rem; line-height: 1.5; }
+    .profile-stats { display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text2); }
+    .profile-stats .number { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+    
+    .profile-actions { margin-top: 1rem; }
+    .follow-btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); font-weight: 500; }
+    .follow-btn:hover { background: var(--accent2); border-color: var(--accent2); }
+    .follow-btn.following { background: var(--surface2); border-color: var(--border); color: var(--text2); }
+    .follow-btn.following:hover { border-color: #ef4444; color: #ef4444; background: transparent; }
+
+    .section-header { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text2); margin-bottom: 1rem; }
+    
+    .battles-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .battle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; }
+    .battle-card:hover { border-color: var(--accent); transform: translateX(4px); }
+    .battle-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .battle-card .meta { font-size: 0.75rem; color: var(--text3); display: flex; gap: 0.75rem; }
+
+    .error { text-align: center; padding: 3rem; }
+    .error h2 { font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; }
+    .error p { color: var(--text2); margin-bottom: 0.5rem; }
+    .error a { color: var(--accent); }
+
+    .loading { color: var(--text3); }
+
+    footer { padding: 2rem; text-align: center; border-top: 1px solid var(--border); margin-top: 4rem; }
+    footer p { font-size: 0.75rem; color: var(--text3); }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">PHOENIX ARENA</a>
+    <div class="nav-right">
+      <a href="/arena">Arena</a>
+      <a href="/builder">Builder</a>
+      <a href="/archive">Archive</a>
+      <a href="/guide">Guide</a>
+      <a href="/dashboard">Dashboard</a>
+      <button class="notif-btn" id="notifBtn" style="display:none" onclick="window.location='/dashboard'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <a href="/auth/github" class="login-btn" id="loginBtn">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Sign in
+      </a>
+      <a href="/dashboard" class="user-link" id="userLink" style="display:none">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span id="userName"></span>
+      </a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div class="loading">Loading profile...</div>
+  </main>
+
+  <footer>
+    <p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem('phoenix_token');
+    const profileUsername = window.location.pathname.split('/').pop();
+    let currentUser = null;
+    let profileUser = null;
+    let isFollowing = false;
+    
+    // Auth handling
+    (async function() {
+      if (token) {
+        try {
+          const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+          const data = await res.json();
+          if (data.user) {
+            currentUser = data.user;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userLink').style.display = 'flex';
+            document.getElementById('userAvatar').src = data.user.avatar_url || '';
+            document.getElementById('userName').textContent = data.user.username || 'Dashboard';
+            document.getElementById('notifBtn').style.display = 'block';
+            loadNotifCount();
+          }
+        } catch (e) {}
+      }
+      loadProfile();
+    })();
+    
+    async function loadNotifCount() {
+      try {
+        const res = await fetch('/api/notifications/unread', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.count > 0) {
+          document.getElementById('notifBadge').textContent = data.count > 99 ? '99+' : data.count;
+          document.getElementById('notifBadge').style.display = 'flex';
+        }
+      } catch (e) {}
+    }
+    
+    async function loadProfile() {
+      const main = document.getElementById('main');
+      
+      try {
+        const res = await fetch(`/api/profile/${profileUsername}`);
+        
+        if (!res.ok) {
+          main.innerHTML = `
+            <div class="error">
+              <h2>User not found</h2>
+              <p>This user doesn't exist.</p>
+              <p><a href="/archive">← Back to Archive</a></p>
+            </div>
+          `;
+          return;
+        }
+        
+        const data = await res.json();
+        profileUser = data.user;
+        const battles = data.battles || [];
+        const totalViews = battles.reduce((sum, b) => sum + (b.views || 0), 0);
+        
+        // Check if following
+        if (currentUser && currentUser.username !== profileUsername) {
+          try {
+            const followingRes = await fetch(`/api/users/${currentUser.username}/following`);
+            const following = await followingRes.json();
+            isFollowing = following.some(u => u.username === profileUsername);
+          } catch (e) {}
+        }
+        
+        const isOwnProfile = currentUser && currentUser.username === profileUsername;
+        
+        main.innerHTML = `
+          <div class="profile-header">
+            <img class="profile-avatar" src="${profileUser.avatar_url || ''}" alt="">
+            <div class="profile-info">
+              <h1>${escapeHtml(profileUser.name || profileUser.username)}</h1>
+              <p class="username">@${profileUser.username}</p>
+              ${profileUser.bio ? `<p class="profile-bio">${escapeHtml(profileUser.bio)}</p>` : ''}
+              <div class="profile-stats">
+                <span><span class="number">${battles.length}</span> battles</span>
+                <span><span class="number">${totalViews}</span> total views</span>
+              </div>
+              ${!isOwnProfile && currentUser ? `
+                <div class="profile-actions">
+                  <button class="follow-btn ${isFollowing ? 'following' : ''}" id="followBtn" onclick="toggleFollow()">
+                    ${isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                </div>
+              ` : ''}
+              ${!isOwnProfile && !currentUser ? `
+                <div class="profile-actions">
+                  <a href="/auth/github" class="follow-btn">Sign in to Follow</a>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <h2 class="section-header">Published Battles</h2>
+          
+          <div class="battles-list">
+            ${battles.length > 0 ? battles.map(b => `
+              <div class="battle-card" onclick="window.location='/battle/${b.id}'">
+                <h3>${escapeHtml(b.title || b.agent1 + ' vs ' + b.agent2)}</h3>
+                <div class="meta">
+                  <span>${b.turns} turns</span>
+                  <span>${formatDate(b.created_at)}</span>
+                  <span>${b.views || 0} views</span>
+                </div>
+              </div>
+            `).join('') : '<p class="loading">No published battles yet.</p>'}
+          </div>
+        `;
+        
+        document.title = `${profileUser.name || profileUser.username} - Phoenix Arena`;
+        
+      } catch (e) {
+        main.innerHTML = `
+          <div class="error">
+            <h2>Error loading profile</h2>
+            <p>${e.message}</p>
+            <p><a href="/archive">← Back to Archive</a></p>
+          </div>
+        `;
+      }
+    }
+    
+    async function toggleFollow() {
+      const btn = document.getElementById('followBtn');
+      
+      try {
+        const method = 'POST';
+        const endpoint = isFollowing ? 'unfollow' : 'follow';
+        
+        const res = await fetch(`/api/users/${profileUsername}/${endpoint}`, {
+          method,
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          isFollowing = !isFollowing;
+          btn.textContent = isFollowing ? 'Following' : 'Follow';
+          btn.classList.toggle('following', isFollowing);
+        }
+      } catch (e) {}
+    }
+    
+    function formatDate(timestamp) {
+      return new Date(timestamp * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

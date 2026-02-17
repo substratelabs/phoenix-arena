@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archive - Phoenix Arena</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --surface2: #18181b;
+      --border: #27272a;
+      --text: #fafafa;
+      --text2: #a1a1aa;
+      --text3: #52525b;
+      --accent: #f97316;
+      --accent2: #fb923c;
+    }
+    
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
+    .logo:hover { color: var(--accent2); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .nav-right a.active { color: var(--accent); }
+    .login-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent) !important; padding: 0.4rem 0.8rem; border-radius: 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; transition: all 0.2s; }
+    .login-btn:hover { background: var(--accent); color: var(--bg) !important; }
+    .login-btn svg { width: 16px; height: 16px; }
+    .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
+    .user-link:hover { color: var(--text); }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; object-fit: cover; }
+    .user-link:hover .user-avatar { border-color: var(--accent); }
+
+    /* Notification Bell */
+    .notif-btn { position: relative; background: none; border: none; color: var(--text2); cursor: pointer; padding: 0.4rem; transition: color 0.2s; display: none; }
+    .notif-btn:hover { color: var(--text); }
+    .notif-btn svg { width: 20px; height: 20px; }
+    .notif-badge { position: absolute; top: 0; right: 0; background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 600; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .notif-dropdown { display: none; position: fixed; top: 56px; right: 2rem; width: 320px; max-height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1001; overflow: hidden; }
+    .notif-dropdown.active { display: block; }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    .notif-header span { font-weight: 500; font-size: 0.9rem; }
+    .notif-header button { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; }
+    .notif-list { max-height: 340px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .notif-item:hover { background: var(--surface2); }
+    .notif-item.unread { background: rgba(249, 115, 22, 0.05); }
+    .notif-item img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .notif-content { flex: 1; }
+    .notif-text { font-size: 0.85rem; color: var(--text2); }
+    .notif-text strong { color: var(--text); }
+    .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
+    .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem; padding-top: 5rem; display: grid; grid-template-columns: 1fr 280px; gap: 2rem; }
+    @media (max-width: 800px) { .container { grid-template-columns: 1fr; } .sidebar { order: -1; } }
+
+    .main-content { min-width: 0; }
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .page-header p { color: var(--text2); font-size: 0.9rem; }
+
+    .search-bar { display: flex; align-items: center; gap: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.75rem 1rem; margin-bottom: 1.5rem; transition: border-color 0.2s; }
+    .search-bar:focus-within { border-color: var(--accent); }
+    .search-bar svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
+    .search-bar input { flex: 1; background: none; border: none; color: var(--text); font-size: 0.9rem; outline: none; }
+    .search-bar input::placeholder { color: var(--text3); }
+
+    .category-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .category-tab { padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text2); cursor: pointer; border: 1px solid var(--border); border-radius: 2rem; background: transparent; transition: all 0.2s; }
+    .category-tab:hover { border-color: var(--text3); color: var(--text); }
+    .category-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+    .archive-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; }
+    .archive-entry:hover { border-color: var(--accent); transform: translateX(4px); }
+    .archive-entry h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text); }
+    .archive-entry .meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--text3); align-items: center; margin-bottom: 0.5rem; }
+    .models { background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: var(--text2); }
+    .author-link { color: var(--accent); text-decoration: none; transition: all 0.2s; }
+    .author-link:hover { color: var(--accent2); text-decoration: underline; }
+    .stats-inline { display: flex; align-items: center; gap: 0.25rem; }
+    .stats-inline svg { width: 12px; height: 12px; }
+    .preview { font-size: 0.8rem; color: var(--text3); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .preview mark { background: rgba(249, 115, 22, 0.3); color: var(--accent); padding: 0 2px; border-radius: 2px; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text3); }
+    .empty-state a { color: var(--accent); text-decoration: none; }
+
+    .sidebar-section { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+    .sidebar-section h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .creator-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid var(--border); }
+    .creator-item:last-child { border-bottom: none; }
+    .creator-item:hover { transform: translateX(4px); }
+    .creator-item img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface2); }
+    .creator-item .info { flex: 1; min-width: 0; }
+    .creator-item .name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .creator-item .handle { font-size: 0.7rem; color: var(--text3); }
+    .creator-item .count { font-size: 0.7rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    footer { grid-column: 1 / -1; padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
+    footer p { font-size: 0.75rem; color: var(--text3); }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">PHOENIX ARENA</a>
+    <div class="nav-right">
+      <a href="/arena">Arena</a>
+      <a href="/builder">Builder</a>
+      <a href="/archive" class="active">Archive</a>
+      <a href="/guide">Guide</a>
+      <a href="/dashboard">Dashboard</a>
+      <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <a href="/auth/github" class="login-btn" id="loginBtn">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Sign in
+      </a>
+      <a href="/dashboard" class="user-link" id="userLink" style="display:none">
+        <img class="user-avatar" id="userAvatar" src="" alt="">
+        <span id="userName"></span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="notif-dropdown" id="notifDropdown">
+    <div class="notif-header"><span>Notifications</span><button onclick="markAllRead()">Mark all read</button></div>
+    <div class="notif-list" id="notifList"><div class="notif-empty">No notifications</div></div>
+  </div>
+
+  <div class="container">
+    <div class="main-content">
+      <div class="page-header">
+        <h1>Archive</h1>
+        <p>Published battles and AI conversations from the community.</p>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search battles, users, or content...">
+      </div>
+
+      <div class="category-tabs">
+        <button class="category-tab active" data-sort="newest">Newest</button>
+        <button class="category-tab" data-sort="oldest">Oldest</button>
+        <button class="category-tab" data-sort="popular">Popular</button>
+      </div>
+
+      <div class="archive-list" id="archiveList"><div class="empty-state">Loading...</div></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h3>Top Creators</h3>
+        <div id="topCreators"><div style="color: var(--text3); font-size: 0.8rem;">Loading...</div></div>
+      </div>
+    </div>
+
+    <footer><p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p></footer>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('phoenix_token');
+    let currentUser = null;
+    let allEntries = [];
+    let currentSort = 'newest';
+    let currentQuery = '';
+    
+    async function checkAuth() {
+      if (!token) return;
+      try {
+        const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.user) {
+          currentUser = data.user;
+          document.getElementById('loginBtn').style.display = 'none';
+          document.getElementById('userLink').style.display = 'flex';
+          document.getElementById('userAvatar').src = data.user.avatar_url || '';
+          document.getElementById('userName').textContent = data.user.username || 'Dashboard';
+          document.getElementById('notifBtn').style.display = 'block';
+          loadNotifications();
+        }
+      } catch (e) {}
+    }
+    
+    async function loadNotifications() {
+      if (!token) return;
+      try {
+        const countRes = await fetch('/api/notifications/unread', { headers: { 'Authorization': `Bearer ${token}` } });
+        const countData = await countRes.json();
+        const badge = document.getElementById('notifBadge');
+        if (countData.count > 0) {
+          badge.textContent = countData.count > 99 ? '99+' : countData.count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (e) {}
+    }
+    
+    function toggleNotifications() {
+      const dropdown = document.getElementById('notifDropdown');
+      dropdown.classList.toggle('active');
+      if (dropdown.classList.contains('active')) loadNotifList();
+    }
+    
+    async function loadNotifList() {
+      try {
+        const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } });
+        const notifications = await res.json();
+        const list = document.getElementById('notifList');
+        if (notifications.length === 0) {
+          list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+          return;
+        }
+        list.innerHTML = notifications.map(n => `
+          <div class="notif-item ${n.read ? '' : 'unread'}" onclick="${n.battle_id ? `window.location='/battle/${n.battle_id}'` : (n.from_username ? `window.location='/profile/${n.from_username}'` : '')}">
+            <img src="${n.from_avatar || ''}" alt="">
+            <div class="notif-content">
+              <div class="notif-text"><strong>${escapeHtml(n.from_username || 'Someone')}</strong> ${escapeHtml(n.content)}</div>
+              <div class="notif-time">${formatTimeAgo(n.created_at)}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+    
+    async function markAllRead() {
+      try {
+        await fetch('/api/notifications/read', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        document.getElementById('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+      } catch (e) {}
+    }
+    
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('notifDropdown');
+      const btn = document.getElementById('notifBtn');
+      if (!dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
+    });
+    
+    async function loadArchive() {
+      const list = document.getElementById('archiveList');
+      try {
+        const res = await fetch('/api/archive/published');
+        allEntries = await res.json();
+        allEntries.forEach(entry => {
+          try {
+            const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
+            if (transcript && transcript.length > 0) {
+              entry.previewText = transcript.slice(0, 2).map(t => t.content || '').join(' ').substring(0, 200);
+            }
+          } catch (e) { entry.previewText = ''; }
+        });
+        if (!allEntries.length) {
+          list.innerHTML = '<div class="empty-state"><h3>No published battles yet</h3><p>Run a battle in the arena and publish it.</p><a href="/arena">Enter Arena →</a></div>';
+          return;
+        }
+        renderEntries(allEntries);
+      } catch (e) {
+        list.innerHTML = '<div class="empty-state"><p>Error loading archive</p></div>';
+      }
+    }
+
+    async function loadTopCreators() {
+      try {
+        const res = await fetch('/api/users/top');
+        const users = await res.json();
+        if (users.length > 0) {
+          document.getElementById('topCreators').innerHTML = users.slice(0, 8).map(u => `
+            <div class="creator-item" onclick="window.location='/profile/${u.username}'">
+              <img src="${u.avatar_url || ''}" alt="">
+              <div class="info"><div class="name">${escapeHtml(u.name || u.username)}</div><div class="handle">@${u.username}</div></div>
+              <div class="count">${u.battle_count}</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('topCreators').innerHTML = '<div style="color: var(--text3); font-size: 0.8rem;">No creators yet</div>';
+        }
+      } catch (e) {}
+    }
+    
+    function renderEntries(entries, query = '') {
+      const list = document.getElementById('archiveList');
+      let sorted = [...entries];
+      if (currentSort === 'newest') sorted.sort((a, b) => b.created_at - a.created_at);
+      else if (currentSort === 'oldest') sorted.sort((a, b) => a.created_at - b.created_at);
+      else if (currentSort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+      
+      if (sorted.length === 0) { list.innerHTML = '<div class="empty-state"><p>No results found</p></div>'; return; }
+      
+      list.innerHTML = sorted.map(entry => {
+        let models = '';
+        try {
+          const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
+          if (transcript && transcript[0]?.model) {
+            const modelSet = new Set(transcript.map(t => t.model).filter(Boolean));
+            models = [...modelSet].map(m => m.includes('opus') ? 'Opus' : m.includes('sonnet') ? 'Sonnet' : m.includes('haiku') ? 'Haiku' : m.split('-')[1] || m).join(' vs ');
+            models = models ? `<span class="models">${models}</span>` : '';
+          }
+        } catch (e) {}
+        
+        const authorHtml = entry.username ? `<a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">@${entry.username}</a>` : '';
+        let previewHtml = entry.previewText ? `<div class="preview">${query ? highlightText(entry.previewText, query) : escapeHtml(entry.previewText)}...</div>` : '';
+        
+        return `
+          <div class="archive-entry" onclick="window.location='/battle/${entry.id}'">
+            <h3>${escapeHtml(entry.title || entry.agent1 + ' vs ' + entry.agent2)}</h3>
+            <div class="meta">
+              <span>${entry.turns} turns</span>
+              ${models}
+              <span>${formatDate(entry.created_at)}</span>
+              <span class="stats-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${entry.like_count || 0}</span>
+              <span class="stats-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${entry.comment_count || 0}</span>
+              ${authorHtml}
+            </div>
+            ${previewHtml}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function highlightText(text, query) {
+      if (!query || !text) return escapeHtml(text);
+      const escaped = escapeHtml(text);
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return escaped.replace(regex, '<mark>$1</mark>');
+    }
+    
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentQuery = e.target.value.toLowerCase().trim();
+        if (!currentQuery) { renderEntries(allEntries); return; }
+        const filtered = allEntries.filter(entry => {
+          const title = (entry.title || '').toLowerCase();
+          const agent1 = (entry.agent1 || '').toLowerCase();
+          const agent2 = (entry.agent2 || '').toLowerCase();
+          const username = (entry.username || '').toLowerCase();
+          const preview = (entry.previewText || '').toLowerCase();
+          return title.includes(currentQuery) || agent1.includes(currentQuery) || agent2.includes(currentQuery) || username.includes(currentQuery) || preview.includes(currentQuery);
+        });
+        renderEntries(filtered, currentQuery);
+      }, 200);
+    });
+    
+    document.querySelectorAll('.category-tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentSort = tab.dataset.sort;
+        if (currentQuery) {
+          const filtered = allEntries.filter(e => (e.title||'').toLowerCase().includes(currentQuery) || (e.username||'').toLowerCase().includes(currentQuery) || (e.previewText||'').toLowerCase().includes(currentQuery));
+          renderEntries(filtered, currentQuery);
+        } else renderEntries(allEntries);
+      };
+    });
+    
+    function formatDate(ts) { return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    function formatTimeAgo(ts) {
+      const s = Math.floor(Date.now() / 1000 - ts);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+      return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    
+    checkAuth();
+    loadArchive();
+    loadTopCreators();
+  </script>
+</body>
+</html>
