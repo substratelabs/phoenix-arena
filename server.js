@@ -754,13 +754,17 @@ app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (re
       return res.status(400).json({ error: 'Invalid image data' });
     }
     
-    // Extract base64 data
-    const matches = avatar.match(/^data:image\/(\w+);base64,(.+)$/);
+    // Extract base64 data - more permissive regex for mime types like image/png, image/jpeg, image/webp
+    const matches = avatar.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
     if (!matches) {
       return res.status(400).json({ error: 'Invalid image format' });
     }
     
-    const ext = matches[1];
+    let ext = matches[1];
+    // Normalize extension
+    if (ext === 'jpeg') ext = 'jpg';
+    if (ext === 'svg+xml') ext = 'svg';
+    
     const data = matches[2];
     const buffer = Buffer.from(data, 'base64');
     
