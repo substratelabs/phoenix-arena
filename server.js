@@ -346,6 +346,18 @@ function setupUserTable() {
       )
     `);
     
+    // Comment votes table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS comment_votes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        comment_id INTEGER NOT NULL,
+        vote INTEGER NOT NULL,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        UNIQUE(user_id, comment_id)
+      )
+    `);
+    
     // Notifications table
     db.exec(`
       CREATE TABLE IF NOT EXISTS notifications (
@@ -377,13 +389,24 @@ function upsertUser(data) {
     const existing = db.prepare('SELECT * FROM users WHERE github_id = ?').get(data.github_id);
     
     if (existing) {
-      // Update
-      db.prepare(`
-        UPDATE users SET username = ?, avatar_url = ?, name = ?, updated_at = strftime('%s', 'now')
-        WHERE github_id = ?
-      `).run(data.username, data.avatar_url, data.name, data.github_id);
+      // Update - only update fields that user hasn't customized
+      // Check if user has custom avatar (not from GitHub)
+      const hasCustomAvatar = existing.avatar_url && !existing.avatar_url.includes('githubusercontent.com');
+      const hasCustomName = existing.name && existing.name !== data.name;
+      const hasCustomUsername = existing.username && existing.username !== data.username;
       
-      return { ...existing, ...data };
+      // Only update GitHub-synced fields if user hasn't customized them
+      const newAvatarUrl = hasCustomAvatar ? existing.avatar_url : data.avatar_url;
+      const newName = hasCustomName ? existing.name : data.name;
+      // Keep username if customized, otherwise use GitHub username
+      const newUsername = hasCustomUsername ? existing.username : data.username;
+      
+      db.prepare(`
+        UPDATE users SET updated_at = strftime('%s', 'now')
+        WHERE github_id = ?
+      `).run(data.github_id);
+      
+      return { ...existing, avatar_url: newAvatarUrl, name: newName, username: newUsername };
     } else {
       // Insert
       const result = db.prepare(`
@@ -641,7 +664,9 @@ app.get('/api/archive/published', (req, res) => {
   
   try {
     const battles = db.prepare(`
-      SELECT pb.*, u.username 
+      SELECT pb.*, u.username,
+        (SELECT COUNT(*) FROM likes WHERE battle_id = pb.id) as like_count,
+        (SELECT COUNT(*) FROM comments WHERE battle_id = pb.id) as comment_count
       FROM published_battles pb
       LEFT JOIN users u ON pb.user_id = u.id
       ORDER BY pb.created_at DESC
@@ -998,12 +1023,23 @@ app.get('/api/battles/:id/comments', (req, res) => {
   try {
     const battleId = parseInt(req.params.id);
     const comments = db.prepare(`
-      SELECT c.*, u.username, u.avatar_url, u.name
+      SELECT c.*, u.username, u.avatar_url, u.name,
+        (SELECT COUNT(*) FROM comment_votes WHERE comment_id = c.id AND vote = 1) as upvotes,
+        (SELECT COUNT(*) FROM comment_votes WHERE comment_id = c.id AND vote = -1) as downvotes
       FROM comments c
       JOIN users u ON c.user_id = u.id
       WHERE c.battle_id = ?
       ORDER BY c.created_at DESC
     `).all(battleId);
+    
+    // Add user's vote if logged in
+    if (req.user) {
+      comments.forEach(c => {
+        const userVote = db.prepare('SELECT vote FROM comment_votes WHERE user_id = ? AND comment_id = ?').get(req.user.id, c.id);
+        c.userVote = userVote ? userVote.vote : 0;
+      });
+    }
+    
     res.json(comments);
   } catch (e) {
     res.json([]);
@@ -1061,6 +1097,66 @@ app.delete('/api/comments/:id', requireAuth, (req, res) => {
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// Vote on a comment (upvote/downvote)
+app.post('/api/comments/:id/vote', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  const { vote } = req.body; // 1 for upvote, -1 for downvote, 0 to remove
+  if (![1, -1, 0].includes(vote)) {
+    return res.status(400).json({ error: 'Invalid vote value' });
+  }
+  
+  try {
+    const commentId = parseInt(req.params.id);
+    const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(commentId);
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+    
+    if (vote === 0) {
+      // Remove vote
+      db.prepare('DELETE FROM comment_votes WHERE user_id = ? AND comment_id = ?').run(req.user.id, commentId);
+    } else {
+      // Upsert vote
+      db.prepare(`
+        INSERT INTO comment_votes (user_id, comment_id, vote) VALUES (?, ?, ?)
+        ON CONFLICT(user_id, comment_id) DO UPDATE SET vote = ?
+      `).run(req.user.id, commentId, vote, vote);
+    }
+    
+    // Get updated vote counts
+    const upvotes = db.prepare('SELECT COUNT(*) as count FROM comment_votes WHERE comment_id = ? AND vote = 1').get(commentId);
+    const downvotes = db.prepare('SELECT COUNT(*) as count FROM comment_votes WHERE comment_id = ? AND vote = -1').get(commentId);
+    
+    res.json({ 
+      success: true, 
+      upvotes: upvotes.count, 
+      downvotes: downvotes.count,
+      score: upvotes.count - downvotes.count
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get user's total received likes
+app.get('/api/users/:username/stats', (req, res) => {
+  if (!db) return res.json({ totalLikes: 0 });
+  
+  try {
+    const user = db.prepare('SELECT id FROM users WHERE username = ?').get(req.params.username);
+    if (!user) return res.json({ totalLikes: 0 });
+    
+    const result = db.prepare(`
+      SELECT COUNT(*) as count FROM likes l
+      JOIN published_battles pb ON l.battle_id = pb.id
+      WHERE pb.user_id = ?
+    `).get(user.id);
+    
+    res.json({ totalLikes: result.count });
+  } catch (e) {
+    res.json({ totalLikes: 0 });
   }
 });
 
