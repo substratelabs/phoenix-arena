@@ -245,6 +245,7 @@
             <span class="stat" onclick="openFollowersModal('following')"><span class="number" id="statFollowing">0</span> following</span>
             <span class="stat"><span class="number" id="statBattles">0</span> battles</span>
             <span class="stat"><span class="number" id="statViews">0</span> views</span>
+            <span class="stat"><span class="number" id="statLikes">0</span> likes</span>
           </div>
         </div>
       </div>
@@ -395,6 +396,13 @@
         const totalViews = battles.reduce((sum, b) => sum + (b.views || 0), 0);
         document.getElementById('statBattles').textContent = battles.length;
         document.getElementById('statViews').textContent = totalViews;
+        
+        // Get total likes received
+        try {
+          const likesRes = await fetch(`/api/users/${currentUser.username}/stats`);
+          const likesData = await likesRes.json();
+          document.getElementById('statLikes').textContent = likesData.totalLikes || 0;
+        } catch (e) {}
         
         if (battles.length > 0) {
           document.getElementById('battlesList').innerHTML = battles.map(b => `
