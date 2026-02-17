@@ -19,29 +19,9 @@
       --accent2: #fb923c;
     }
     
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg); 
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Navigation - Universal Header */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      height: 56px;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(10, 10, 11, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 11, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
     .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
     .nav-right { display: flex; align-items: center; gap: 1.5rem; }
@@ -53,123 +33,44 @@
     .login-btn svg { width: 16px; height: 16px; }
     .user-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text2); font-size: 0.85rem; transition: color 0.2s; }
     .user-link:hover { color: var(--text); }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; object-fit: cover; }
     .user-link:hover .user-avatar { border-color: var(--accent); }
 
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem;
-      padding-top: 5rem;
-    }
+    main { max-width: 700px; margin: 0 auto; padding: 2rem; padding-top: 5rem; }
 
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .profile-header { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: var(--surface); }
+    .profile-info { flex: 1; }
+    .profile-info h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .username { color: var(--text3); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .profile-bio { color: var(--text2); font-size: 0.85rem; margin-bottom: 0.75rem; line-height: 1.5; }
+    .profile-stats { display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text2); }
+    .profile-stats .number { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+    
+    .profile-actions { margin-top: 1rem; }
+    .follow-btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); font-weight: 500; }
+    .follow-btn:hover { background: var(--accent2); border-color: var(--accent2); }
+    .follow-btn.following { background: var(--surface2); border-color: var(--border); color: var(--text2); }
+    .follow-btn.following:hover { border-color: #ef4444; color: #ef4444; background: transparent; }
 
-    .profile-avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 3px solid var(--accent);
-    }
+    .section-header { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text2); margin-bottom: 1rem; }
+    
+    .battles-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .battle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; }
+    .battle-card:hover { border-color: var(--accent); transform: translateX(4px); }
+    .battle-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .battle-card .meta { font-size: 0.75rem; color: var(--text3); display: flex; gap: 0.75rem; }
 
-    .profile-info h1 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.75rem;
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
+    .error { text-align: center; padding: 3rem; }
+    .error h2 { font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; }
+    .error p { color: var(--text2); margin-bottom: 0.5rem; }
+    .error a { color: var(--accent); }
 
-    .profile-info .username {
-      color: var(--text3);
-      font-size: 1rem;
-      margin-bottom: 0.75rem;
-    }
+    .loading { color: var(--text3); }
 
-    .profile-stats {
-      display: flex;
-      gap: 1.5rem;
-      font-size: 0.85rem;
-      color: var(--text2);
-    }
-
-    .profile-stats .number {
-      color: var(--accent);
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 500;
-    }
-
-    .section-header {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text2);
-      margin-bottom: 1rem;
-    }
-
-    .battles-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .battle-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 1rem 1.25rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .battle-card:hover {
-      border-color: var(--accent);
-      transform: translateX(4px);
-    }
-
-    .battle-card h3 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
-
-    .battle-card .meta {
-      font-size: 0.75rem;
-      color: var(--text3);
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .loading, .error {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text3);
-    }
-
-    footer {
-      padding: 2rem;
-      text-align: center;
-      border-top: 1px solid var(--border);
-      margin-top: 4rem;
-    }
-
-    footer p {
-      font-size: 0.75rem;
-      color: var(--text3);
-    }
-
-    footer a {
-      color: var(--text2);
-      text-decoration: none;
-    }
-
+    footer { padding: 2rem; text-align: center; border-top: 1px solid var(--border); margin-top: 4rem; }
+    footer p { font-size: 0.75rem; color: var(--text3); }
+    footer a { color: var(--text2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
   </style>
 </head>
@@ -202,38 +103,35 @@
   </footer>
 
   <script>
-    const username = window.location.pathname.split('/').pop();
+    const token = localStorage.getItem('phoenix_token');
+    const profileUsername = window.location.pathname.split('/').pop();
+    let currentUser = null;
+    let profileUser = null;
+    let isFollowing = false;
     
     // Auth handling
-    (function() {
-      const token = localStorage.getItem('phoenix_token');
-      const loginBtn = document.getElementById('loginBtn');
-      const userLink = document.getElementById('userLink');
-      const userAvatarEl = document.getElementById('userAvatar');
-      const userNameEl = document.getElementById('userName');
-      
-      if (token && loginBtn) {
-        fetch('/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(data => {
+    (async function() {
+      if (token) {
+        try {
+          const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+          const data = await res.json();
           if (data.user) {
-            loginBtn.style.display = 'none';
-            userLink.style.display = 'flex';
-            userAvatarEl.src = data.user.avatar_url || '';
-            userNameEl.textContent = data.user.username || 'Dashboard';
+            currentUser = data.user;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userLink').style.display = 'flex';
+            document.getElementById('userAvatar').src = data.user.avatar_url || '';
+            document.getElementById('userName').textContent = data.user.username || 'Dashboard';
           }
-        })
-        .catch(() => {});
+        } catch (e) {}
       }
+      loadProfile();
     })();
     
     async function loadProfile() {
       const main = document.getElementById('main');
       
       try {
-        const res = await fetch(`/api/profile/${username}`);
+        const res = await fetch(`/api/profile/${profileUsername}`);
         
         if (!res.ok) {
           main.innerHTML = `
@@ -247,20 +145,44 @@
         }
         
         const data = await res.json();
-        const user = data.user;
+        profileUser = data.user;
         const battles = data.battles || [];
         const totalViews = battles.reduce((sum, b) => sum + (b.views || 0), 0);
         
+        // Check if following
+        if (currentUser && currentUser.username !== profileUsername) {
+          try {
+            const followingRes = await fetch(`/api/users/${currentUser.username}/following`);
+            const following = await followingRes.json();
+            isFollowing = following.some(u => u.username === profileUsername);
+          } catch (e) {}
+        }
+        
+        const isOwnProfile = currentUser && currentUser.username === profileUsername;
+        
         main.innerHTML = `
           <div class="profile-header">
-            <img class="profile-avatar" src="${user.avatar_url || ''}" alt="">
+            <img class="profile-avatar" src="${profileUser.avatar_url || ''}" alt="">
             <div class="profile-info">
-              <h1>${user.name || user.username}</h1>
-              <p class="username">@${user.username}</p>
+              <h1>${escapeHtml(profileUser.name || profileUser.username)}</h1>
+              <p class="username">@${profileUser.username}</p>
+              ${profileUser.bio ? `<p class="profile-bio">${escapeHtml(profileUser.bio)}</p>` : ''}
               <div class="profile-stats">
                 <span><span class="number">${battles.length}</span> battles</span>
                 <span><span class="number">${totalViews}</span> total views</span>
               </div>
+              ${!isOwnProfile && currentUser ? `
+                <div class="profile-actions">
+                  <button class="follow-btn ${isFollowing ? 'following' : ''}" id="followBtn" onclick="toggleFollow()">
+                    ${isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                </div>
+              ` : ''}
+              ${!isOwnProfile && !currentUser ? `
+                <div class="profile-actions">
+                  <a href="/auth/github" class="follow-btn">Sign in to Follow</a>
+                </div>
+              ` : ''}
             </div>
           </div>
 
@@ -280,7 +202,7 @@
           </div>
         `;
         
-        document.title = `${user.name || user.username} - Phoenix Arena`;
+        document.title = `${profileUser.name || profileUser.username} - Phoenix Arena`;
         
       } catch (e) {
         main.innerHTML = `
@@ -293,9 +215,28 @@
       }
     }
     
+    async function toggleFollow() {
+      const btn = document.getElementById('followBtn');
+      
+      try {
+        const method = 'POST';
+        const endpoint = isFollowing ? 'unfollow' : 'follow';
+        
+        const res = await fetch(`/api/users/${profileUsername}/${endpoint}`, {
+          method,
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          isFollowing = !isFollowing;
+          btn.textContent = isFollowing ? 'Following' : 'Follow';
+          btn.classList.toggle('following', isFollowing);
+        }
+      } catch (e) {}
+    }
+    
     function formatDate(timestamp) {
-      const date = new Date(timestamp * 1000);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return new Date(timestamp * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
     
     function escapeHtml(text) {
@@ -304,8 +245,6 @@
       div.textContent = text;
       return div.innerHTML;
     }
-    
-    loadProfile();
   </script>
 </body>
 </html>

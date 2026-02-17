@@ -67,8 +67,8 @@
     .archive-entry .meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--text3); align-items: center; margin-bottom: 0.5rem; }
     .archive-entry .meta span { display: flex; align-items: center; }
     .models { background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: var(--text2); }
-    .author-text { color: var(--text3); }
-    .author-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; transition: all 0.2s; }
+    .author-span { color: var(--text3); }
+    .author-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; transition: all 0.2s; margin-left: 0; }
     .author-link:hover { color: var(--accent2); }
     
     .preview { font-size: 0.8rem; color: var(--text3); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -266,10 +266,10 @@
           }
         } catch (e) {}
         
-        // Build author HTML with proper spacing
+        // Build author HTML with proper spacing - use explicit space
         const authorHtml = entry.username 
-          ? `<span class="author-text">by </span><a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">${entry.username}</a>`
-          : '<span class="author-text">by Anonymous</span>';
+          ? `by <a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">${entry.username}</a>`
+          : 'by Anonymous';
         
         // Preview with highlighting
         let previewHtml = '';
@@ -287,7 +287,7 @@
               ${models}
               <span>${formatDate(entry.created_at)}</span>
               <span>${entry.views || 0} views</span>
-              <span>${authorHtml}</span>
+              <span class="author-span">${authorHtml}</span>
             </div>
             ${previewHtml}
           </div>
