@@ -18,6 +18,7 @@
       --accent: #f97316;
       --accent2: #fb923c;
       --success: #22c55e;
+      --danger: #ef4444;
     }
     
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -46,7 +47,7 @@
 
     .profile-header { display: flex; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
     .avatar-section { position: relative; }
-    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: var(--surface); }
     .avatar-upload { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; background: var(--surface); border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
     .avatar-upload:hover { border-color: var(--accent); background: var(--surface2); }
     .avatar-upload svg { width: 14px; height: 14px; color: var(--text2); }
@@ -79,8 +80,9 @@
     .btn:hover { border-color: var(--text3); }
     .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
     .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
-    .btn.danger { color: #ef4444; border-color: #ef4444; background: transparent; }
-    .btn.danger:hover { background: #ef4444; color: white; }
+    .btn.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+    .btn.danger:hover { background: var(--danger); color: white; }
+    .btn.small { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
 
     .followers-list { max-height: 400px; overflow-y: auto; }
     .follower-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
@@ -92,7 +94,11 @@
     .follow-btn { padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); background: transparent; color: var(--accent); }
     .follow-btn:hover { background: var(--accent); color: var(--bg); }
     .follow-btn.following { background: var(--surface2); border-color: var(--border); color: var(--text2); }
-    .follow-btn.following:hover { border-color: #ef4444; color: #ef4444; background: transparent; }
+    .follow-btn.following:hover { border-color: var(--danger); color: var(--danger); background: transparent; }
+
+    .section-title { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text2); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .section-title a { color: var(--accent); font-size: 0.8rem; text-decoration: none; }
+    .section-title a:hover { text-decoration: underline; }
 
     .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
     .tab { padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
@@ -102,14 +108,30 @@
     .tab-content.active { display: block; }
 
     .battles-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .battle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-    .battle-card:hover { border-color: var(--accent); transform: translateX(4px); }
+    .battle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .battle-card:hover { border-color: var(--accent); }
+    .battle-card-link { flex: 1; cursor: pointer; }
     .battle-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
     .battle-card .meta { font-size: 0.75rem; color: var(--text3); display: flex; gap: 0.75rem; }
-    .battle-card .views { color: var(--text2); font-size: 0.8rem; }
+    .battle-card .actions { display: flex; gap: 0.5rem; align-items: center; }
+    .battle-card .views { color: var(--text2); font-size: 0.8rem; margin-right: 0.5rem; }
+    .delete-btn { background: none; border: none; color: var(--text3); cursor: pointer; padding: 0.25rem; transition: color 0.2s; }
+    .delete-btn:hover { color: var(--danger); }
+    .delete-btn svg { width: 16px; height: 16px; }
+    
     .empty-state { text-align: center; padding: 3rem; color: var(--text3); }
     .empty-state a { color: var(--accent); text-decoration: none; }
     .empty-state a:hover { text-decoration: underline; }
+
+    /* Discover Section */
+    .discover-section { margin-bottom: 2rem; }
+    .discover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+    .discover-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .discover-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .discover-card img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--border); margin-bottom: 0.5rem; object-fit: cover; background: var(--surface2); }
+    .discover-card .name { font-weight: 500; font-size: 0.85rem; margin-bottom: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .discover-card .handle { color: var(--text3); font-size: 0.7rem; margin-bottom: 0.35rem; }
+    .discover-card .stats { font-size: 0.7rem; color: var(--accent); }
 
     .settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.25rem; margin-bottom: 1rem; }
     .settings-section h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 500; color: var(--text2); margin-bottom: 1rem; }
@@ -121,23 +143,13 @@
     .setting-input input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.8rem; }
     .setting-input input:focus { outline: none; border-color: var(--accent); }
 
-    /* Discover Section */
-    .discover-section { margin-bottom: 2rem; }
-    .discover-section h2 { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text2); margin-bottom: 1rem; }
-    .discover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-    .discover-card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .discover-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .discover-card img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--border); margin-bottom: 0.75rem; object-fit: cover; }
-    .discover-card .name { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.25rem; }
-    .discover-card .handle { color: var(--text3); font-size: 0.8rem; margin-bottom: 0.5rem; }
-    .discover-card .stats { font-size: 0.75rem; color: var(--text2); }
-
     footer { padding: 2rem; text-align: center; border-top: 1px solid var(--border); margin-top: 4rem; }
     footer p { font-size: 0.75rem; color: var(--text3); }
     footer a { color: var(--text2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
     .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--surface); border: 1px solid var(--success); color: var(--success); padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 0.85rem; opacity: 0; transition: all 0.3s; z-index: 3000; }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
@@ -200,7 +212,7 @@
 
       <!-- Discover Users -->
       <div class="discover-section" id="discoverSection">
-        <h2>Discover Creators</h2>
+        <div class="section-title">Discover Creators <a href="/archive">View all →</a></div>
         <div class="discover-grid" id="discoverGrid"></div>
       </div>
 
@@ -261,6 +273,17 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h2>Delete Battle?</h2>
+      <p style="color: var(--text2); margin-bottom: 1rem;">This action cannot be undone. The battle will be permanently removed from the archive.</p>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast">Saved!</div>
 
   <footer><p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p></footer>
@@ -268,6 +291,7 @@
   <script>
     const token = localStorage.getItem('phoenix_token');
     let currentUser = null;
+    let battleToDelete = null;
     
     function updateNavAuth(user) {
       const loginBtn = document.getElementById('loginBtn');
@@ -290,17 +314,30 @@
     });
 
     async function loadDashboard() {
-      if (!token) { document.getElementById('loginPrompt').style.display = 'block'; document.getElementById('dashboardContent').style.display = 'none'; return; }
+      if (!token) { 
+        document.getElementById('loginPrompt').style.display = 'block'; 
+        document.getElementById('dashboardContent').style.display = 'none'; 
+        return; 
+      }
+      
       try {
         const userRes = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
         const userData = await userRes.json();
-        if (!userData.user) { localStorage.removeItem('phoenix_token'); document.getElementById('loginPrompt').style.display = 'block'; document.getElementById('dashboardContent').style.display = 'none'; return; }
-        currentUser = userData.user;
         
+        if (!userData.user) { 
+          localStorage.removeItem('phoenix_token'); 
+          document.getElementById('loginPrompt').style.display = 'block'; 
+          document.getElementById('dashboardContent').style.display = 'none'; 
+          return; 
+        }
+        
+        currentUser = userData.user;
         updateNavAuth(currentUser);
         
         document.getElementById('loginPrompt').style.display = 'none';
         document.getElementById('dashboardContent').style.display = 'block';
+        
+        // Update profile display
         document.getElementById('profileAvatar').src = currentUser.avatar_url || '';
         document.getElementById('profileName').textContent = currentUser.name || currentUser.username;
         document.getElementById('profileUsername').textContent = '@' + currentUser.username;
@@ -313,22 +350,36 @@
           document.getElementById('apiKeyInput').value = currentUser.api_key;
         }
         
+        // Load battles
         const battlesRes = await fetch('/api/archive/user', { headers: { 'Authorization': `Bearer ${token}` } });
         const battles = await battlesRes.json();
         const totalViews = battles.reduce((sum, b) => sum + (b.views || 0), 0);
         document.getElementById('statBattles').textContent = battles.length;
         document.getElementById('statViews').textContent = totalViews;
+        
         if (battles.length > 0) {
           document.getElementById('battlesList').innerHTML = battles.map(b => `
-            <div class="battle-card" onclick="window.location='/battle/${b.id}'">
-              <div><h3>${escapeHtml(b.title || b.agent1 + ' vs ' + b.agent2)}</h3><div class="meta"><span>${b.turns} turns</span><span>${formatDate(b.created_at)}</span></div></div>
-              <div class="views">${b.views || 0} views</div>
+            <div class="battle-card">
+              <div class="battle-card-link" onclick="window.location='/battle/${b.id}'">
+                <h3>${escapeHtml(b.title || b.agent1 + ' vs ' + b.agent2)}</h3>
+                <div class="meta"><span>${b.turns} turns</span><span>${formatDate(b.created_at)}</span></div>
+              </div>
+              <div class="actions">
+                <span class="views">${b.views || 0} views</span>
+                <button class="delete-btn" onclick="confirmDelete(${b.id})" title="Delete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
             </div>
           `).join('');
         }
         
+        // Load discover users
         loadDiscoverUsers();
-      } catch (e) { console.error('Dashboard error:', e); }
+        
+      } catch (e) { 
+        console.error('Dashboard error:', e); 
+      }
     }
 
     async function loadDiscoverUsers() {
@@ -337,12 +388,13 @@
         const users = await res.json();
         
         // Filter out current user
-        const others = users.filter(u => u.id !== currentUser.id);
+        const others = users.filter(u => currentUser && u.id !== currentUser.id);
         
         if (others.length > 0) {
+          document.getElementById('discoverSection').style.display = 'block';
           document.getElementById('discoverGrid').innerHTML = others.slice(0, 6).map(u => `
             <div class="discover-card" onclick="window.location='/profile/${u.username}'">
-              <img src="${u.avatar_url || ''}" alt="">
+              <img src="${u.avatar_url || ''}" alt="" onerror="this.style.background='var(--surface2)'">
               <div class="name">${escapeHtml(u.name || u.username)}</div>
               <div class="handle">@${u.username}</div>
               <div class="stats">${u.battle_count} battles</div>
@@ -352,6 +404,7 @@
           document.getElementById('discoverSection').style.display = 'none';
         }
       } catch (e) {
+        console.error('Error loading discover:', e);
         document.getElementById('discoverSection').style.display = 'none';
       }
     }
@@ -368,23 +421,31 @@
       const name = document.getElementById('editName').value.trim();
       const username = document.getElementById('editUsername').value.trim().toLowerCase();
       const bio = document.getElementById('editBio').value.trim();
-      if (!username.match(/^[a-z0-9_]+$/)) { alert('Username can only contain lowercase letters, numbers, and underscores'); return; }
+      
+      if (!username.match(/^[a-z0-9_]+$/)) { 
+        alert('Username can only contain lowercase letters, numbers, and underscores'); 
+        return; 
+      }
+      
       try {
-        const res = await fetch('/api/profile/update', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ name, username, bio }) });
+        const res = await fetch('/api/profile/update', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+          body: JSON.stringify({ name, username, bio }) 
+        });
+        
         if (res.ok) { 
           closeEditModal(); 
           showToast('Profile saved!'); 
-          // Update local user object
-          currentUser.name = name;
-          currentUser.username = username;
-          currentUser.bio = bio;
-          // Update UI immediately
-          document.getElementById('profileName').textContent = name || username;
-          document.getElementById('profileUsername').textContent = '@' + username;
-          document.getElementById('profileBio').textContent = bio || 'No bio yet. Click edit to add one.';
-          updateNavAuth(currentUser);
-        } else { const err = await res.json(); alert(err.error || 'Failed to save'); }
-      } catch (e) { alert('Error saving profile'); }
+          // Reload to get fresh data
+          loadDashboard();
+        } else { 
+          const err = await res.json(); 
+          alert(err.error || 'Failed to save'); 
+        }
+      } catch (e) { 
+        alert('Error saving profile'); 
+      }
     }
 
     async function saveApiKey() {
@@ -397,16 +458,17 @@
         });
         if (res.ok) { 
           showToast('API key saved!');
-          // Also store in localStorage for arena
           if (apiKey) {
             localStorage.setItem('anthropic_api_key', apiKey);
           } else {
             localStorage.removeItem('anthropic_api_key');
           }
         } else { 
-          alert('Failed to save API key'); 
+          showToast('Failed to save API key', true); 
         }
-      } catch (e) { alert('Error saving API key'); }
+      } catch (e) { 
+        showToast('Error saving API key', true); 
+      }
     }
 
     document.getElementById('avatarInput').addEventListener('change', async (e) => {
@@ -414,7 +476,6 @@
       if (!file) return;
       if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2MB'); return; }
       
-      // Convert to base64
       const reader = new FileReader();
       reader.onload = async () => {
         try {
@@ -424,51 +485,118 @@
             body: JSON.stringify({ avatar: reader.result }) 
           });
           if (res.ok) { 
-            const data = await res.json();
             showToast('Avatar updated!');
-            currentUser.avatar_url = data.avatar_url;
-            document.getElementById('profileAvatar').src = data.avatar_url;
-            updateNavAuth(currentUser);
+            loadDashboard();
           } else { 
-            alert('Failed to upload avatar'); 
+            showToast('Failed to upload avatar', true); 
           }
-        } catch (e) { alert('Error uploading avatar'); }
+        } catch (e) { 
+          showToast('Error uploading avatar', true); 
+        }
       };
       reader.readAsDataURL(file);
+    });
+
+    // Delete functionality
+    function confirmDelete(battleId) {
+      battleToDelete = battleId;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+    
+    function closeDeleteModal() {
+      battleToDelete = null;
+      document.getElementById('deleteModal').classList.remove('active');
+    }
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+      if (!battleToDelete) return;
+      
+      try {
+        const res = await fetch(`/api/archive/${battleToDelete}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          closeDeleteModal();
+          showToast('Battle deleted');
+          loadDashboard();
+        } else {
+          showToast('Failed to delete', true);
+        }
+      } catch (e) {
+        showToast('Error deleting battle', true);
+      }
     });
 
     async function openFollowersModal(type) {
       document.getElementById('followersModalTitle').textContent = type === 'followers' ? 'Followers' : 'Following';
       document.getElementById('followersList').innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">Loading...</p>';
       document.getElementById('followersModal').classList.add('active');
+      
       try {
         const res = await fetch(`/api/users/${currentUser.username}/${type}`);
         const users = await res.json();
-        if (users.length === 0) { document.getElementById('followersList').innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">No ' + type + ' yet</p>'; return; }
+        
+        if (users.length === 0) { 
+          document.getElementById('followersList').innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">No ' + type + ' yet</p>'; 
+          return; 
+        }
+        
         document.getElementById('followersList').innerHTML = users.map(u => `
           <div class="follower-item">
             <img src="${u.avatar_url || ''}" alt="" onclick="window.location='/profile/${u.username}'">
-            <div class="follower-info" onclick="window.location='/profile/${u.username}'"><div class="name">${escapeHtml(u.name || u.username)}</div><div class="handle">@${u.username}</div></div>
-            ${u.id !== currentUser.id ? `<button class="follow-btn ${u.is_following ? 'following' : ''}" onclick="toggleFollow('${u.username}', this)">${u.is_following ? 'Following' : 'Follow'}</button>` : ''}
+            <div class="follower-info" onclick="window.location='/profile/${u.username}'">
+              <div class="name">${escapeHtml(u.name || u.username)}</div>
+              <div class="handle">@${u.username}</div>
+            </div>
+            <button class="follow-btn" onclick="toggleFollow('${u.username}', this)">Follow</button>
           </div>
         `).join('');
-      } catch (e) { document.getElementById('followersList').innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">Error loading</p>'; }
+      } catch (e) { 
+        document.getElementById('followersList').innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">Error loading</p>'; 
+      }
     }
+    
     function closeFollowersModal() { document.getElementById('followersModal').classList.remove('active'); }
 
     async function toggleFollow(username, btn) {
       const isFollowing = btn.classList.contains('following');
       try {
-        const res = await fetch(`/api/users/${username}/${isFollowing ? 'unfollow' : 'follow'}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) { btn.classList.toggle('following'); btn.textContent = isFollowing ? 'Follow' : 'Following'; }
+        const res = await fetch(`/api/users/${username}/${isFollowing ? 'unfollow' : 'follow'}`, { 
+          method: 'POST', 
+          headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        if (res.ok) { 
+          btn.classList.toggle('following'); 
+          btn.textContent = isFollowing ? 'Follow' : 'Following'; 
+        }
       } catch (e) {}
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('phoenix_token'); window.location.href = '/'; });
+    document.getElementById('logoutBtn').addEventListener('click', () => { 
+      localStorage.removeItem('phoenix_token'); 
+      window.location.href = '/'; 
+    });
 
-    function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
-    function formatDate(ts) { return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
-    function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+    function showToast(msg, isError = false) { 
+      const toast = document.getElementById('toast'); 
+      toast.textContent = msg; 
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.classList.add('show'); 
+      setTimeout(() => toast.classList.remove('show'), 2500); 
+    }
+    
+    function formatDate(ts) { 
+      return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); 
+    }
+    
+    function escapeHtml(text) { 
+      if (!text) return ''; 
+      const div = document.createElement('div'); 
+      div.textContent = text; 
+      return div.innerHTML; 
+    }
 
     loadDashboard();
   </script>
