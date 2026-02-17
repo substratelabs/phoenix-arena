@@ -324,6 +324,42 @@ function setupUserTable() {
       )
     `);
     
+    // Likes table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS likes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        battle_id INTEGER NOT NULL,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        UNIQUE(user_id, battle_id)
+      )
+    `);
+    
+    // Comments table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        battle_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        created_at INTEGER DEFAULT (strftime('%s', 'now'))
+      )
+    `);
+    
+    // Notifications table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        from_user_id INTEGER,
+        battle_id INTEGER,
+        content TEXT,
+        read INTEGER DEFAULT 0,
+        created_at INTEGER DEFAULT (strftime('%s', 'now'))
+      )
+    `);
+    
     console.log('User tables ready');
   } catch (e) {
     console.error('Failed to setup user tables:', e.message);
@@ -745,6 +781,7 @@ app.get('/api/users/top', (req, res) => {
   if (!db) return res.json([]);
   
   try {
+    // Get all users with at least one battle
     const users = db.prepare(`
       SELECT u.id, u.username, u.name, u.avatar_url, COUNT(pb.id) as battle_count
       FROM users u
@@ -754,6 +791,17 @@ app.get('/api/users/top', (req, res) => {
       ORDER BY battle_count DESC
       LIMIT 10
     `).all();
+    
+    // If no users with battles, return all users
+    if (users.length === 0) {
+      const allUsers = db.prepare(`
+        SELECT id, username, name, avatar_url, 0 as battle_count
+        FROM users
+        LIMIT 10
+      `).all();
+      return res.json(allUsers);
+    }
+    
     res.json(users);
   } catch (e) {
     res.json([]);
@@ -823,7 +871,19 @@ app.post('/api/users/:username/follow', requireAuth, (req, res) => {
       PRIMARY KEY (follower_id, following_id)
     )`);
     
-    db.prepare('INSERT OR IGNORE INTO follows (follower_id, following_id) VALUES (?, ?)').run(req.user.id, targetUser.id);
+    // Check if already following
+    const existing = db.prepare('SELECT * FROM follows WHERE follower_id = ? AND following_id = ?').get(req.user.id, targetUser.id);
+    
+    if (!existing) {
+      db.prepare('INSERT INTO follows (follower_id, following_id) VALUES (?, ?)').run(req.user.id, targetUser.id);
+      
+      // Create notification
+      db.prepare(`
+        INSERT INTO notifications (user_id, type, from_user_id, content)
+        VALUES (?, 'follow', ?, 'started following you')
+      `).run(targetUser.id, req.user.id);
+    }
+    
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -859,6 +919,200 @@ app.delete('/api/archive/:id', requireAuth, (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+// ============================================================================
+// LIKES
+// ============================================================================
+
+// Like a battle
+app.post('/api/battles/:id/like', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const battleId = parseInt(req.params.id);
+    const battle = db.prepare('SELECT * FROM published_battles WHERE id = ?').get(battleId);
+    if (!battle) return res.status(404).json({ error: 'Battle not found' });
+    
+    // Add like
+    db.prepare('INSERT OR IGNORE INTO likes (user_id, battle_id) VALUES (?, ?)').run(req.user.id, battleId);
+    
+    // Create notification for battle owner (if not self)
+    if (battle.user_id && battle.user_id !== req.user.id) {
+      db.prepare(`
+        INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
+        VALUES (?, 'like', ?, ?, ?)
+      `).run(battle.user_id, req.user.id, battleId, `liked your battle "${battle.title || 'Untitled'}"`);
+    }
+    
+    // Get updated like count
+    const count = db.prepare('SELECT COUNT(*) as count FROM likes WHERE battle_id = ?').get(battleId);
+    res.json({ success: true, likes: count.count });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Unlike a battle
+app.delete('/api/battles/:id/like', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const battleId = parseInt(req.params.id);
+    db.prepare('DELETE FROM likes WHERE user_id = ? AND battle_id = ?').run(req.user.id, battleId);
+    
+    const count = db.prepare('SELECT COUNT(*) as count FROM likes WHERE battle_id = ?').get(battleId);
+    res.json({ success: true, likes: count.count });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get likes for a battle
+app.get('/api/battles/:id/likes', (req, res) => {
+  if (!db) return res.json({ likes: 0, liked: false });
+  
+  try {
+    const battleId = parseInt(req.params.id);
+    const count = db.prepare('SELECT COUNT(*) as count FROM likes WHERE battle_id = ?').get(battleId);
+    
+    let liked = false;
+    if (req.user) {
+      const userLike = db.prepare('SELECT id FROM likes WHERE user_id = ? AND battle_id = ?').get(req.user.id, battleId);
+      liked = !!userLike;
+    }
+    
+    res.json({ likes: count.count, liked });
+  } catch (e) {
+    res.json({ likes: 0, liked: false });
+  }
+});
+
+// ============================================================================
+// COMMENTS
+// ============================================================================
+
+// Get comments for a battle
+app.get('/api/battles/:id/comments', (req, res) => {
+  if (!db) return res.json([]);
+  
+  try {
+    const battleId = parseInt(req.params.id);
+    const comments = db.prepare(`
+      SELECT c.*, u.username, u.avatar_url, u.name
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.battle_id = ?
+      ORDER BY c.created_at DESC
+    `).all(battleId);
+    res.json(comments);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+// Add comment to a battle
+app.post('/api/battles/:id/comments', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  const { content } = req.body;
+  if (!content || content.trim().length === 0) {
+    return res.status(400).json({ error: 'Comment cannot be empty' });
+  }
+  
+  try {
+    const battleId = parseInt(req.params.id);
+    const battle = db.prepare('SELECT * FROM published_battles WHERE id = ?').get(battleId);
+    if (!battle) return res.status(404).json({ error: 'Battle not found' });
+    
+    const result = db.prepare('INSERT INTO comments (user_id, battle_id, content) VALUES (?, ?, ?)').run(req.user.id, battleId, content.trim());
+    
+    // Create notification for battle owner (if not self)
+    if (battle.user_id && battle.user_id !== req.user.id) {
+      db.prepare(`
+        INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
+        VALUES (?, 'comment', ?, ?, ?)
+      `).run(battle.user_id, req.user.id, battleId, `commented on your battle "${battle.title || 'Untitled'}"`);
+    }
+    
+    // Return the new comment with user info
+    const comment = db.prepare(`
+      SELECT c.*, u.username, u.avatar_url, u.name
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?
+    `).get(result.lastInsertRowid);
+    
+    res.json(comment);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete a comment
+app.delete('/api/comments/:id', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(parseInt(req.params.id));
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+    if (comment.user_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+    
+    db.prepare('DELETE FROM comments WHERE id = ?').run(comment.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+// Get notifications for current user
+app.get('/api/notifications', requireAuth, (req, res) => {
+  if (!db) return res.json([]);
+  
+  try {
+    const notifications = db.prepare(`
+      SELECT n.*, u.username as from_username, u.avatar_url as from_avatar
+      FROM notifications n
+      LEFT JOIN users u ON n.from_user_id = u.id
+      WHERE n.user_id = ?
+      ORDER BY n.created_at DESC
+      LIMIT 50
+    `).all(req.user.id);
+    res.json(notifications);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+// Get unread notification count
+app.get('/api/notifications/unread', requireAuth, (req, res) => {
+  if (!db) return res.json({ count: 0 });
+  
+  try {
+    const result = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read = 0').get(req.user.id);
+    res.json({ count: result.count });
+  } catch (e) {
+    res.json({ count: 0 });
+  }
+});
+
+// Mark notifications as read
+app.post('/api/notifications/read', requireAuth, (req, res) => {
+  if (!db) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    db.prepare('UPDATE notifications SET read = 1 WHERE user_id = ?').run(req.user.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Add notification when someone follows (update follow endpoint)
+
 
 // Get single published battle
 app.get('/api/archive/:id', (req, res) => {
