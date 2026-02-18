@@ -36,8 +36,13 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
+    .nav-left { display: flex; align-items: center; gap: 1rem; }
     .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
+    .nav-status { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text3); padding: 0.25rem 0.5rem; background: var(--surface); border-radius: 0.25rem; border: 1px solid var(--border); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .status-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .status-dot.disconnected { background: var(--text3); }
     .nav-right { display: flex; align-items: center; gap: 1.5rem; }
     .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-right a:hover { color: var(--text); }
@@ -49,6 +54,30 @@
     .user-link:hover { color: var(--text); }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: border-color 0.2s; }
     .user-link:hover .user-avatar { border-color: var(--accent); }
+
+    /* Notification Bell */
+    .notif-btn { position: relative; background: none; border: none; color: var(--text2); cursor: pointer; padding: 0.4rem; transition: color 0.2s; }
+    .notif-btn:hover { color: var(--text); }
+    .notif-btn svg { width: 20px; height: 20px; }
+    .notif-badge { position: absolute; top: 0; right: 0; background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 600; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
+    /* Notifications Dropdown */
+    .notif-dropdown { display: none; position: fixed; top: 56px; right: 2rem; width: 320px; max-height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1001; overflow: hidden; }
+    .notif-dropdown.active { display: block; }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    .notif-header span { font-weight: 500; font-size: 0.9rem; }
+    .notif-header button { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; }
+    .notif-header button:hover { text-decoration: underline; }
+    .notif-list { max-height: 340px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .notif-item:hover { background: var(--surface2); }
+    .notif-item.unread { background: rgba(249, 115, 22, 0.05); }
+    .notif-item img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .notif-content { flex: 1; }
+    .notif-text { font-size: 0.85rem; color: var(--text2); line-height: 1.4; }
+    .notif-text strong { color: var(--text); }
+    .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
+    .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
     
     /* Arena Controls Bar */
     .arena-controls { 
@@ -161,6 +190,9 @@
     .simple-mode { flex: 1; display: flex; flex-direction: column; }
     .simple-mode .shared-prompt { flex: 1; }
     .simple-mode textarea { width: 100%; min-height: 100px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.6rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; resize: none; }
+    .simple-mode textarea.placeholder-mode { color: var(--text3); }
+    .simple-mode textarea::placeholder { color: var(--text3); }
+    .save-preset-btn { font-size: 0.6rem !important; padding: 0.2rem 0.5rem !important; }
     
     .advanced-mode { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
     .advanced-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
@@ -236,14 +268,24 @@
 </head>
 <body>
   <nav>
-    <a href="/" class="logo">PHOENIX ARENA</a>
+    <div class="nav-left">
+      <a href="/" class="logo">PHOENIX ARENA</a>
+      <div class="nav-status" id="navStatus">
+        <div class="status-dot disconnected" id="navStatusDot"></div>
+        <span id="navStatusText">Disconnected</span>
+      </div>
+    </div>
     <div class="nav-right">
       <a href="/arena" class="active">Arena</a>
       <a href="/builder">Builder</a>
       <a href="/archive">Archive</a>
       <a href="/guide">Guide</a>
       <a href="/dashboard">Dashboard</a>
-      <a href="/auth/github" class="login-btn" id="loginBtn">
+      <button class="notif-btn" id="notifBtn" style="display:none" onclick="toggleNotifications()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <a href="/auth/github" class="login-btn" id="loginBtn" style="display:none">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         Sign in
       </a>
@@ -254,26 +296,47 @@
     </div>
   </nav>
   
+  <script>
+    // Immediate auth state - show correct UI before page renders
+    (function() {
+      const token = localStorage.getItem('phoenix_token');
+      const cachedUser = localStorage.getItem('phoenix_user');
+      if (token && cachedUser) {
+        try {
+          const user = JSON.parse(cachedUser);
+          document.getElementById('userLink').style.display = 'flex';
+          document.getElementById('userAvatar').src = user.avatar_url || '';
+          document.getElementById('userName').textContent = user.username || '';
+          document.getElementById('notifBtn').style.display = 'block';
+        } catch (e) {
+          document.getElementById('loginBtn').style.display = 'flex';
+        }
+      } else if (!token) {
+        document.getElementById('loginBtn').style.display = 'flex';
+      }
+    })();
+  </script>
+
+  <!-- Notifications Dropdown -->
+  <div class="notif-dropdown" id="notifDropdown">
+    <div class="notif-header"><span>Notifications</span><button onclick="markAllRead()">Mark all read</button></div>
+    <div class="notif-list" id="notifList"><div class="notif-empty">No notifications</div></div>
+  </div>
+  
   <div class="app">
     <div class="arena-controls">
       <div class="arena-controls-left">
         <input type="text" id="battleTitle" class="battle-title-input" placeholder="Battle title...">
-        <div class="status"><div class="dot" id="statusDot"></div><span id="statusText">Connected</span></div>
       </div>
       <div class="arena-controls-right">
-        <button class="header-btn" id="presetsBtn">Presets</button>
+        <button class="header-btn" id="presetsBtn">Load Preset</button>
         <button class="header-btn" id="settingsBtn">Providers</button>
       </div>
     </div>
 
     <div class="panel" id="presetsPanel">
-      <h3>Saved Agent Presets</h3>
+      <h3>Load Agent Preset</h3>
       <div class="presets-list" id="presetsList"><span style="color: var(--text3); font-size: 0.75rem;">No presets saved</span></div>
-      <div class="save-preset">
-        <input type="text" id="newPresetName" placeholder="Preset name...">
-        <select id="presetAgent"><option value="1">From Agent 1</option><option value="2">From Agent 2</option></select>
-        <button class="btn secondary" id="savePresetBtn">Save</button>
-      </div>
     </div>
 
     <div class="panel" id="settingsPanel">
@@ -309,6 +372,7 @@
     <div class="setup">
       <div class="agent-config a">
         <h3>Agent 1 
+          <button class="btn secondary persist-btn save-preset-btn" onclick="savePresetFromAgent(1)">Save</button>
           <button class="btn secondary persist-btn" id="keepAgent1" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain1" style="display:none">Export Brain</button>
         </h3>
@@ -335,6 +399,7 @@
 
       <div class="agent-config b">
         <h3>Agent 2 
+          <button class="btn secondary persist-btn save-preset-btn" onclick="savePresetFromAgent(2)">Save</button>
           <button class="btn secondary persist-btn" id="keepAgent2" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain2" style="display:none">Export Brain</button>
         </h3>
@@ -485,6 +550,19 @@
         window.history.replaceState({}, '', '/');
       }
     }
+    
+    // Show cached user immediately to prevent flash
+    (function() {
+      const cachedUser = localStorage.getItem('phoenix_user');
+      if (authToken && cachedUser) {
+        try {
+          const user = JSON.parse(cachedUser);
+          currentUser = user;
+          updateAuthUI(user);
+          $('notifBtn').style.display = 'block';
+        } catch (e) {}
+      }
+    })();
 
     async function checkAuth() {
       if (!authToken) {
@@ -499,11 +577,17 @@
         });
         const data = await res.json();
         currentUser = data.user;
-        updateAuthUI(currentUser);
         
         if (currentUser) {
+          localStorage.setItem('phoenix_user', JSON.stringify(currentUser));
+          updateAuthUI(currentUser);
           loadServerPresets();
+          $('notifBtn').style.display = 'block';
+          loadNotifications();
         } else {
+          localStorage.removeItem('phoenix_token');
+          localStorage.removeItem('phoenix_user');
+          updateAuthUI(null);
           loadLocalPresets();
         }
       } catch (e) {
@@ -512,6 +596,80 @@
         loadLocalPresets();
       }
     }
+    
+    // Notifications
+    async function loadNotifications() {
+      if (!authToken) return;
+      try {
+        const countRes = await fetch(API + '/api/notifications/unread', { headers: { 'Authorization': `Bearer ${authToken}` } });
+        const countData = await countRes.json();
+        const badge = $('notifBadge');
+        if (countData.count > 0) {
+          badge.textContent = countData.count > 99 ? '99+' : countData.count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (e) {}
+    }
+    
+    async function loadNotifList() {
+      try {
+        const res = await fetch(API + '/api/notifications', { headers: { 'Authorization': `Bearer ${authToken}` } });
+        const notifications = await res.json();
+        const list = $('notifList');
+        if (notifications.length === 0) {
+          list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+          return;
+        }
+        list.innerHTML = notifications.map(n => `
+          <div class="notif-item ${n.read ? '' : 'unread'}" onclick="navigateNotif(${n.battle_id || 'null'}, '${n.from_username || ''}')">
+            <img src="${n.from_avatar || ''}" alt="" onerror="this.style.background='var(--surface2)'">
+            <div class="notif-content">
+              <div class="notif-text"><strong>@${escapeHtml(n.from_username || 'Someone')}</strong> ${escapeHtml(n.content)}</div>
+              <div class="notif-time">${formatTimeAgo(n.created_at)}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+    
+    function toggleNotifications() {
+      const dropdown = $('notifDropdown');
+      dropdown.classList.toggle('active');
+      if (dropdown.classList.contains('active')) loadNotifList();
+    }
+    
+    async function markAllRead() {
+      try {
+        await fetch(API + '/api/notifications/read', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } });
+        $('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+      } catch (e) {}
+    }
+    
+    function navigateNotif(battleId, username) {
+      $('notifDropdown').classList.remove('active');
+      if (battleId) window.location = '/battle/' + battleId;
+      else if (username) window.location = '/profile/' + username;
+    }
+    
+    function formatTimeAgo(ts) {
+      const s = Math.floor(Date.now() / 1000 - ts);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+      return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    
+    document.addEventListener('click', (e) => {
+      const dropdown = $('notifDropdown');
+      const btn = $('notifBtn');
+      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
+    });
 
     function updateAuthUI(user) {
       const loginBtn = $('loginBtn');
@@ -594,7 +752,21 @@
     }
 
     // Config
-    async function loadConfig() { try { const r = await fetch(API + '/api/config'); config = await r.json(); } catch {} updateConfigUI(); updateModelDropdowns(); }
+    async function loadConfig() { 
+      try { 
+        const r = await fetch(API + '/api/config'); 
+        config = await r.json(); 
+      } catch {} 
+      updateConfigUI(); 
+      updateModelDropdowns(); 
+      
+      // Check if we have an API key configured (local or server)
+      const localKey = localStorage.getItem('phoenix_apikey');
+      const hasKey = localKey || (currentUser && currentUser.api_key);
+      if (hasKey) {
+        updateConnectionStatus(true, 'API Connected');
+      }
+    }
     function updateConfigUI() { $('anthropicToggle').classList.toggle('on', config.providers?.anthropic?.enabled); $('ollamaToggle').classList.toggle('on', config.providers?.ollama?.enabled); $('ollamaEndpoint').value = config.providers?.ollama?.endpoint || ''; }
     async function saveConfig() { try { await fetch(API + '/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) }); $('ollamaStatus').textContent = 'Saved!'; $('ollamaStatus').className = 'settings-status success'; setTimeout(() => $('ollamaStatus').textContent = '', 2000); updateModelDropdowns(); } catch { $('ollamaStatus').textContent = 'Failed'; $('ollamaStatus').className = 'settings-status error'; } }
     function updateModelDropdowns() { const m = []; if (config.providers?.anthropic?.enabled) m.push({ id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', p: 'anthropic' }, { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', p: 'anthropic' }, { id: 'claude-haiku-4-20250514', name: 'Claude Haiku 4', p: 'anthropic' }); if (config.providers?.ollama?.enabled) m.push({ id: 'llama3', name: 'Llama 3', p: 'ollama' }, { id: 'llama3:70b', name: 'Llama 3 70B', p: 'ollama' }, { id: 'mistral', name: 'Mistral', p: 'ollama' }, { id: 'mixtral', name: 'Mixtral', p: 'ollama' }); if (!m.length) m.push({ id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', p: 'anthropic' }); const o = m.map(x => `<option value="${x.id}" data-provider="${x.p}">${x.name}</option>`).join(''); $('model1').innerHTML = o; $('model2').innerHTML = o; }
@@ -612,6 +784,35 @@
       const o = '<option value="">Load preset...</option>' + n.map(x => `<option value="${x}">${x}</option>`).join(''); 
       $('presetSelect1').innerHTML = o; 
       $('presetSelect2').innerHTML = o; 
+    }
+    
+    // Save preset using agent's name
+    async function savePresetFromAgent(num) {
+      const a = agents[num];
+      const name = a.name || `Agent ${num}`;
+      
+      if (!a.soul && !a.brain) {
+        alert('Agent needs a soul or brain file to save as preset');
+        return;
+      }
+      
+      if (currentUser) {
+        await savePresetToServer(name, a);
+      } else {
+        presets[name] = { name: a.name, soul: a.soul, soulName: a.soulName, brain: a.brain, brainName: a.brainName }; 
+        localStorage.setItem('phoenix_presets', JSON.stringify(presets)); 
+        updatePresetsList();
+      }
+      
+      // Show confirmation
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Saved';
+      btn.style.color = 'var(--success)';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.color = '';
+      }, 1500);
     }
     
     async function savePreset() { 
@@ -688,7 +889,12 @@
 
     // WebSocket
     let battleState = 'idle'; // idle, running, paused, complete
-    function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; $('statusText').textContent = 'Connected'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; $('statusText').textContent = 'Disconnected'; setTimeout(connect, 3000); }; }
+    function connect() { 
+      ws = new WebSocket(API.replace('http', 'ws')); 
+      ws.onopen = () => { updateConnectionStatus(true, 'Connected'); }; 
+      ws.onmessage = e => handleMessage(JSON.parse(e.data)); 
+      ws.onclose = () => { updateConnectionStatus(false, 'Disconnected'); setTimeout(connect, 3000); }; 
+    }
     function handleMessage(d) { 
       switch (d.type) { 
         case 'battle_start': 
@@ -1149,11 +1355,69 @@
         window.history.replaceState({}, '', '/arena');
       }
     }
+    
+    // Placeholder prompt handling
+    function setupPlaceholderPrompt() {
+      const prompt = $('prompt');
+      const defaultText = 'Discuss consciousness. What does it mean to be aware?';
+      const hasSession = sessionStorage.getItem('arena_session_started');
+      
+      if (!hasSession) {
+        prompt.value = defaultText;
+        prompt.classList.add('placeholder-mode');
+        
+        prompt.addEventListener('focus', function() {
+          if (this.classList.contains('placeholder-mode')) {
+            this.classList.remove('placeholder-mode');
+            // Don't clear yet - only on keypress
+          }
+        });
+        
+        prompt.addEventListener('keydown', function(e) {
+          if (this.classList.contains('placeholder-mode')) {
+            this.classList.remove('placeholder-mode');
+            if (e.key === 'Enter') {
+              // Keep the text, make it real
+              sessionStorage.setItem('arena_session_started', 'true');
+            } else if (e.key !== 'Tab' && e.key !== 'Shift') {
+              // Clear and let them type
+              this.value = '';
+              sessionStorage.setItem('arena_session_started', 'true');
+            }
+          }
+        });
+        
+        prompt.addEventListener('blur', function() {
+          if (this.value === '' || this.value === defaultText) {
+            if (!sessionStorage.getItem('arena_session_started')) {
+              this.value = defaultText;
+              this.classList.add('placeholder-mode');
+            }
+          }
+        });
+      }
+    }
+    
+    // Update connection status in nav
+    function updateConnectionStatus(connected, message) {
+      const dot = $('navStatusDot');
+      const text = $('navStatusText');
+      if (connected) {
+        dot.classList.remove('disconnected');
+        dot.classList.add('connected');
+        text.textContent = message || 'Connected';
+      } else {
+        dot.classList.remove('connected');
+        dot.classList.add('disconnected');
+        text.textContent = message || 'Disconnected';
+      }
+    }
 
     // Init
     checkAuthCallback();
     setupUploads(1); 
     setupUploads(2); 
+    setupPlaceholderPrompt();
     loadConfig(); 
     connect();
     checkAuth();
