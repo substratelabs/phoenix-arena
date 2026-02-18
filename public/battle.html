@@ -64,12 +64,12 @@
 
     .agents-info { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
     .agent-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; }
-    .agent-card.agent-0 { border-left: 3px solid #e4e4e7; }
-    .agent-card.agent-1 { border-left: 3px solid #71717a; }
+    .agent-card.agent-0 { border-left: 3px solid var(--accent); }
+    .agent-card.agent-1 { border-left: 3px solid var(--text3); }
     .agent-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
     .agent-card-title { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 500; }
-    .agent-card.agent-0 .agent-card-title { color: #e4e4e7; }
-    .agent-card.agent-1 .agent-card-title { color: #71717a; }
+    .agent-card.agent-0 .agent-card-title { color: var(--accent); }
+    .agent-card.agent-1 .agent-card-title { color: var(--text2); }
     .agent-model { font-size: 0.7rem; color: var(--accent); background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); padding: 0.2rem 0.5rem; border-radius: 0.25rem; }
     .agent-card-name { font-size: 0.9rem; color: var(--text); }
 
@@ -79,12 +79,12 @@
 
     .transcript { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
     .turn { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.25rem; border-left: 3px solid var(--border); }
-    .turn.agent-0 { border-left-color: #e4e4e7; }
-    .turn.agent-1 { border-left-color: #71717a; }
+    .turn.agent-0 { border-left-color: var(--accent); }
+    .turn.agent-1 { border-left-color: var(--text3); }
     .turn-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
     .turn-speaker { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 500; }
-    .turn.agent-0 .turn-speaker { color: #e4e4e7; }
-    .turn.agent-1 .turn-speaker { color: #71717a; }
+    .turn.agent-0 .turn-speaker { color: var(--accent); }
+    .turn.agent-1 .turn-speaker { color: var(--text2); }
     .turn-meta { display: flex; gap: 0.75rem; align-items: center; }
     .turn-model { font-size: 0.7rem; color: var(--accent); background: rgba(249, 115, 22, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.25rem; }
     .turn-number { font-size: 0.7rem; color: var(--text3); }
@@ -130,23 +130,6 @@
     footer p { font-size: 0.75rem; color: var(--text3); }
     footer a { color: var(--text2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
-
-    /* Notification Dropdown */
-    .notif-dropdown { display: none; position: fixed; top: 56px; right: 2rem; width: 320px; max-height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1001; overflow: hidden; }
-    .notif-dropdown.active { display: block; }
-    .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
-    .notif-header span { font-weight: 500; font-size: 0.9rem; }
-    .notif-header button { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; }
-    .notif-list { max-height: 340px; overflow-y: auto; }
-    .notif-item { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
-    .notif-item:hover { background: var(--surface2); }
-    .notif-item.unread { background: rgba(249, 115, 22, 0.05); }
-    .notif-item img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .notif-content { flex: 1; }
-    .notif-text { font-size: 0.85rem; color: var(--text2); line-height: 1.4; }
-    .notif-text strong { color: var(--text); }
-    .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
-    .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -158,11 +141,11 @@
       <a href="/archive" class="active">Archive</a>
       <a href="/guide">Guide</a>
       <a href="/dashboard">Dashboard</a>
-      <button class="notif-btn" id="notifBtn" style="display:none" onclick="toggleNotifications()">
+      <button class="notif-btn" id="notifBtn" onclick="window.location='/dashboard'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge" id="notifBadge" style="display:none">0</span>
       </button>
-      <a href="/auth/github" class="login-btn" id="loginBtn" style="display:none">
+      <a href="/auth/github" class="login-btn" id="loginBtn">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         Sign in
       </a>
@@ -172,11 +155,6 @@
       </a>
     </div>
   </nav>
-
-  <div class="notif-dropdown" id="notifDropdown">
-    <div class="notif-header"><span>Notifications</span><button onclick="markAllRead()">Mark all read</button></div>
-    <div class="notif-list" id="notifList"><div class="notif-empty">No notifications</div></div>
-  </div>
 
   <main id="main"><div class="loading">Loading battle...</div></main>
 
@@ -189,22 +167,6 @@
     let isLiked = false;
     let likeCount = 0;
     
-    // Show cached user immediately to prevent flash
-    (function() {
-      const cachedUser = localStorage.getItem('phoenix_user');
-      if (token && cachedUser) {
-        try {
-          const user = JSON.parse(cachedUser);
-          currentUser = user;
-          document.getElementById('loginBtn').style.display = 'none';
-          document.getElementById('userLink').style.display = 'flex';
-          document.getElementById('userAvatar').src = user.avatar_url || '';
-          document.getElementById('userName').textContent = user.username || 'Dashboard';
-          document.getElementById('notifBtn').style.display = 'block';
-        } catch (e) {}
-      }
-    })();
-    
     (async function() {
       if (token) {
         try {
@@ -212,16 +174,12 @@
           const data = await res.json();
           if (data.user) {
             currentUser = data.user;
-            localStorage.setItem('phoenix_user', JSON.stringify(data.user));
             document.getElementById('loginBtn').style.display = 'none';
             document.getElementById('userLink').style.display = 'flex';
             document.getElementById('userAvatar').src = data.user.avatar_url || '';
             document.getElementById('userName').textContent = data.user.username || 'Dashboard';
             document.getElementById('notifBtn').style.display = 'block';
             loadNotifCount();
-          } else {
-            localStorage.removeItem('phoenix_token');
-            localStorage.removeItem('phoenix_user');
           }
         } catch (e) {}
       }
@@ -238,53 +196,6 @@
         }
       } catch (e) {}
     }
-    
-    async function loadNotifList() {
-      try {
-        const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } });
-        const notifications = await res.json();
-        const list = document.getElementById('notifList');
-        if (notifications.length === 0) {
-          list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
-          return;
-        }
-        list.innerHTML = notifications.map(n => `
-          <div class="notif-item ${n.read ? '' : 'unread'}" onclick="navigateNotif(${n.battle_id || 'null'}, '${n.from_username || ''}')">
-            <img src="${n.from_avatar || ''}" alt="" onerror="this.style.background='var(--surface2)'">
-            <div class="notif-content">
-              <div class="notif-text"><strong>@${escapeHtml(n.from_username || 'Someone')}</strong> ${escapeHtml(n.content)}</div>
-              <div class="notif-time">${formatTimeAgo(n.created_at)}</div>
-            </div>
-          </div>
-        `).join('');
-      } catch (e) {}
-    }
-    
-    function toggleNotifications() {
-      const dropdown = document.getElementById('notifDropdown');
-      dropdown.classList.toggle('active');
-      if (dropdown.classList.contains('active')) loadNotifList();
-    }
-    
-    async function markAllRead() {
-      try {
-        await fetch('/api/notifications/read', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-        document.getElementById('notifBadge').style.display = 'none';
-        document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
-      } catch (e) {}
-    }
-    
-    function navigateNotif(battleId, username) {
-      document.getElementById('notifDropdown').classList.remove('active');
-      if (battleId) window.location = '/battle/' + battleId;
-      else if (username) window.location = '/profile/' + username;
-    }
-    
-    document.addEventListener('click', (e) => {
-      const dropdown = document.getElementById('notifDropdown');
-      const btn = document.getElementById('notifBtn');
-      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
-    });
     
     async function loadBattle() {
       const main = document.getElementById('main');
@@ -447,8 +358,13 @@
           body: JSON.stringify({ vote })
         });
         if (res.ok) {
-          // Reload comments to get fresh state
-          loadComments();
+          const data = await res.json();
+          document.getElementById(`score-${commentId}`).textContent = data.score;
+          // Update button states
+          const comment = btn.closest('.comment');
+          comment.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('upvoted', 'downvoted'));
+          if (vote === 1) btn.classList.add('upvoted');
+          else if (vote === -1) btn.classList.add('downvoted');
         }
       } catch (e) {}
     }
