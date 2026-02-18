@@ -390,8 +390,8 @@ function upsertUser(data) {
     
     if (existing) {
       // Update - only update fields that user hasn't customized
-      // Check if user has custom avatar (uploaded locally, starts with /uploads/)
-      const hasCustomAvatar = existing.avatar_url && existing.avatar_url.startsWith('/uploads/');
+      // Check if user has custom avatar (not from GitHub)
+      const hasCustomAvatar = existing.avatar_url && !existing.avatar_url.includes('githubusercontent.com');
       const hasCustomName = existing.name && existing.name !== data.name;
       const hasCustomUsername = existing.username && existing.username !== data.username;
       
@@ -754,11 +754,10 @@ app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (re
       return res.status(400).json({ error: 'Invalid image data' });
     }
     
-    // Extract base64 data - more permissive regex for mime types
-    const matches = avatar.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.*)$/s);
+    // Extract base64 data - more permissive regex for mime types like image/png, image/jpeg, image/webp
+    const matches = avatar.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
     if (!matches) {
-      console.error('Avatar upload: regex failed to match');
-      return res.status(400).json({ error: 'Invalid image format - could not parse data URL' });
+      return res.status(400).json({ error: 'Invalid image format' });
     }
     
     let ext = matches[1];
@@ -767,28 +766,11 @@ app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (re
     if (ext === 'svg+xml') ext = 'svg';
     
     const data = matches[2];
-    
-    // Validate base64
-    if (!data || data.length === 0) {
-      return res.status(400).json({ error: 'No image data provided' });
-    }
-    
-    let buffer;
-    try {
-      buffer = Buffer.from(data, 'base64');
-    } catch (e) {
-      console.error('Avatar upload: base64 decode failed', e.message);
-      return res.status(400).json({ error: 'Invalid base64 encoding' });
-    }
+    const buffer = Buffer.from(data, 'base64');
     
     // Check file size (2MB max)
     if (buffer.length > 2 * 1024 * 1024) {
       return res.status(400).json({ error: 'Image must be under 2MB' });
-    }
-    
-    // Minimum size check
-    if (buffer.length < 100) {
-      return res.status(400).json({ error: 'Image file too small or corrupt' });
     }
     
     // Save file
@@ -802,7 +784,6 @@ app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (re
     
     res.json({ success: true, avatar_url: avatarUrl });
   } catch (e) {
-    console.error('Avatar upload error:', e);
     res.status(500).json({ error: e.message });
   }
 });
@@ -1134,17 +1115,8 @@ app.post('/api/comments/:id/vote', requireAuth, (req, res) => {
   
   try {
     const commentId = parseInt(req.params.id);
-    const comment = db.prepare(`
-      SELECT c.*, pb.title as battle_title 
-      FROM comments c 
-      LEFT JOIN published_battles pb ON c.battle_id = pb.id 
-      WHERE c.id = ?
-    `).get(commentId);
+    const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(commentId);
     if (!comment) return res.status(404).json({ error: 'Comment not found' });
-    
-    // Check if this is a new upvote (not changing existing vote)
-    const existingVote = db.prepare('SELECT vote FROM comment_votes WHERE user_id = ? AND comment_id = ?').get(req.user.id, commentId);
-    const isNewUpvote = vote === 1 && (!existingVote || existingVote.vote !== 1);
     
     if (vote === 0) {
       // Remove vote
@@ -1155,14 +1127,6 @@ app.post('/api/comments/:id/vote', requireAuth, (req, res) => {
         INSERT INTO comment_votes (user_id, comment_id, vote) VALUES (?, ?, ?)
         ON CONFLICT(user_id, comment_id) DO UPDATE SET vote = ?
       `).run(req.user.id, commentId, vote, vote);
-      
-      // Create notification for upvotes (not downvotes, not self)
-      if (isNewUpvote && comment.user_id !== req.user.id) {
-        db.prepare(`
-          INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
-          VALUES (?, 'upvote', ?, ?, ?)
-        `).run(comment.user_id, req.user.id, comment.battle_id, `upvoted your comment on "${comment.battle_title || 'a battle'}"`);
-      }
     }
     
     // Get updated vote counts
