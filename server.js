@@ -970,7 +970,7 @@ app.post('/api/battles/:id/like', requireAuth, (req, res) => {
       db.prepare(`
         INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
         VALUES (?, 'like', ?, ?, ?)
-      `).run(battle.user_id, req.user.id, battleId, `liked your battle "${battle.title || 'Untitled'}"`);
+      `).run(battle.user_id, req.user.id, battleId, `liked your battle '${battle.title || 'Untitled'}'`);
     }
     
     // Get updated like count
@@ -1071,7 +1071,7 @@ app.post('/api/battles/:id/comments', requireAuth, (req, res) => {
       db.prepare(`
         INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
         VALUES (?, 'comment', ?, ?, ?)
-      `).run(battle.user_id, req.user.id, battleId, `commented on your battle "${battle.title || 'Untitled'}"`);
+      `).run(battle.user_id, req.user.id, battleId, `commented on your battle '${battle.title || 'Untitled'}'`);
     }
     
     // Return the new comment with user info
@@ -1127,6 +1127,15 @@ app.post('/api/comments/:id/vote', requireAuth, (req, res) => {
         INSERT INTO comment_votes (user_id, comment_id, vote) VALUES (?, ?, ?)
         ON CONFLICT(user_id, comment_id) DO UPDATE SET vote = ?
       `).run(req.user.id, commentId, vote, vote);
+
+      // Notify comment owner on upvote (not self)
+      if (vote === 1 && comment.user_id !== req.user.id) {
+        const battle = db.prepare('SELECT title FROM published_battles WHERE id = ?').get(comment.battle_id);
+        db.prepare(`
+          INSERT INTO notifications (user_id, type, from_user_id, battle_id, content)
+          VALUES (?, 'comment_vote', ?, ?, ?)
+        `).run(comment.user_id, req.user.id, comment.battle_id, `upvoted your comment on '${battle?.title || 'Untitled'}'`);
+      }
     }
     
     // Get updated vote counts
