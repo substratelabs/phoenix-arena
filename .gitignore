@@ -1,0 +1,5 @@
+.DS_Store
+CLAUDE_CONTEXT.md
+.claude
+.claude.json
+node_modules/
