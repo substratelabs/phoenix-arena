@@ -38,6 +38,7 @@
     }
     .logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-decoration: none; }
     .logo:hover { color: var(--accent2); }
+    .nav-status { display: flex; align-items: center; margin-left: 0.75rem; }
     .nav-right { display: flex; align-items: center; gap: 1.5rem; }
     .nav-right a { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .nav-right a:hover { color: var(--text); }
@@ -83,7 +84,6 @@
     .battle-title-input { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; width: 250px; }
     .battle-title-input:focus { border-color: var(--accent); outline: none; background: var(--surface); }
     .battle-title-input::placeholder { color: var(--text3); }
-    .status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text2); }
     .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
     .header-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
     .header-btn:hover { border-color: var(--text3); color: var(--text); }
@@ -135,13 +135,12 @@
     .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
     .preset-chip .delete { opacity: 0.5; }
     .preset-chip .delete:hover { opacity: 1; color: #ef4444; }
-    .save-preset { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-    .save-preset input { flex: 1; }
 
     .setup { display: flex; gap: 1rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; }
     .agent-config { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 200px; }
     .agent-config h3 { font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem; display: flex; align-items: center; justify-content: space-between; }
-    .agent-config h3 .persist-btn { font-size: 0.55rem; padding: 0.2rem 0.5rem; margin-left: auto; text-transform: none; letter-spacing: 0; }
+    .agent-config h3 .save-agent-btn { font-size: 0.55rem; padding: 0.2rem 0.5rem; text-transform: none; letter-spacing: 0; }
+    .agent-config h3 .persist-btn { font-size: 0.55rem; padding: 0.2rem 0.5rem; text-transform: none; letter-spacing: 0; }
     .agent-config h3 .persist-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
     .agent-config h3 .export-brain-btn { background: var(--surface2); }
     .agent-config.a h3 { color: var(--agent1); }
@@ -168,40 +167,40 @@
     .prompt-mode-select { }
     .prompt-mode-select label { font-size: 0.6rem; color: var(--text3); display: block; margin-bottom: 0.25rem; }
     .prompt-mode-select select { background: var(--bg); border: 1px solid var(--border); color: var(--text2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; cursor: pointer; }
-    .mode-toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; color: var(--text3); margin-left: auto; }
+    .mode-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--text3); margin-left: auto; }
     .mode-toggle .toggle { width: 32px; height: 18px; }
     .mode-toggle .toggle::after { width: 12px; height: 12px; }
     .mode-toggle .toggle.on::after { transform: translateX(14px); }
-    .mini-toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.6rem; color: var(--text3); }
+    .mini-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.6rem; color: var(--text3); }
     .mini-toggle .toggle { width: 28px; height: 16px; }
     .mini-toggle .toggle::after { width: 10px; height: 10px; }
     .mini-toggle .toggle.on::after { transform: translateX(12px); }
     
     .simple-mode { flex: 1; display: flex; flex-direction: column; }
     .simple-mode .shared-prompt { flex: 1; }
-    .simple-mode textarea { width: 100%; min-height: 100px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.6rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; resize: none; }
-    
+    .simple-mode textarea { width: 100%; min-height: 120px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.6rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; resize: none; flex: 1; }
+
     .advanced-mode { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
-    .advanced-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .advanced-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
     .advanced-toggles { display: flex; gap: 1rem; align-items: center; }
-    
+
     .battle-title-field { flex: 1; min-width: 150px; }
     .battle-title-field label { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; display: block; margin-bottom: 0.25rem; }
     .battle-title-field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.6rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
-    
+
     .prompt-sections { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
     .shared-prompt-adv { display: flex; flex-direction: column; gap: 0.25rem; }
     .shared-prompt-adv label { font-size: 0.6rem; color: var(--accent); text-transform: uppercase; }
-    .shared-prompt-adv textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; resize: none; min-height: 50px; }
+    .shared-prompt-adv textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; resize: none; min-height: 80px; flex: 1; }
     .shared-prompt-adv.hidden { display: none; }
-    
+
     .individual-prompts { display: none; flex-direction: column; gap: 0.5rem; }
     .individual-prompts.active { display: flex; }
     .individual-prompt { display: flex; flex-direction: column; gap: 0.25rem; }
     .individual-prompt label { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; }
     .individual-prompt label.a { color: var(--agent1); }
     .individual-prompt label.b { color: var(--agent2); }
-    .individual-prompt textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; resize: none; min-height: 50px; }
+    .individual-prompt textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; resize: none; min-height: 60px; flex: 1; }
 
     .controls { display: flex; gap: 0.5rem; align-items: flex-end; }
     .field.turns { width: 80px; }
@@ -256,6 +255,7 @@
 <body>
   <nav>
     <a href="/" class="logo">PHOENIX ARENA</a>
+    <div class="nav-status"><div class="dot" id="statusDot"></div></div>
     <div class="nav-right">
       <a href="/arena" class="active">Arena</a>
       <a href="/builder">Builder</a>
@@ -297,7 +297,6 @@
     <div class="arena-controls">
       <div class="arena-controls-left">
         <input type="text" id="battleTitle" class="battle-title-input" placeholder="Battle title...">
-        <div class="status"><div class="dot" id="statusDot"></div><span id="statusText">Connected</span></div>
       </div>
       <div class="arena-controls-right">
         <button class="header-btn" id="presetsBtn">Presets</button>
@@ -306,13 +305,8 @@
     </div>
 
     <div class="panel" id="presetsPanel">
-      <h3>Saved Agent Presets</h3>
+      <h3>Presets</h3>
       <div class="presets-list" id="presetsList"><span style="color: var(--text3); font-size: 0.75rem;">No presets saved</span></div>
-      <div class="save-preset">
-        <input type="text" id="newPresetName" placeholder="Preset name...">
-        <select id="presetAgent"><option value="1">From Agent 1</option><option value="2">From Agent 2</option></select>
-        <button class="btn secondary" id="savePresetBtn">Save</button>
-      </div>
     </div>
 
     <div class="panel" id="settingsPanel">
@@ -347,7 +341,8 @@
 
     <div class="setup">
       <div class="agent-config a">
-        <h3>Agent 1 
+        <h3>Agent 1
+          <button class="btn secondary save-agent-btn" onclick="saveAgentPreset(1)">Save</button>
           <button class="btn secondary persist-btn" id="keepAgent1" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain1" style="display:none">Export Brain</button>
         </h3>
@@ -373,7 +368,8 @@
       </div>
 
       <div class="agent-config b">
-        <h3>Agent 2 
+        <h3>Agent 2
+          <button class="btn secondary save-agent-btn" onclick="saveAgentPreset(2)">Save</button>
           <button class="btn secondary persist-btn" id="keepAgent2" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain2" style="display:none">Export Brain</button>
         </h3>
@@ -410,7 +406,7 @@
         <!-- SIMPLE MODE (default) -->
         <div class="simple-mode" id="simpleMode">
           <div class="shared-prompt">
-            <textarea id="prompt" placeholder="The scenario or objective for both agents...">Discuss consciousness. What does it mean to be aware?</textarea>
+            <textarea id="prompt" placeholder="The scenario or objective for both agents..."></textarea>
           </div>
         </div>
         
@@ -657,19 +653,33 @@
       $('presetSelect2').innerHTML = o; 
     }
     
-    async function savePreset() { 
-      const n = $('newPresetName').value.trim(); 
-      if (!n) return alert('Enter name'); 
+    function saveAgentPreset(num) {
+      const a = agents[num];
+      const n = ($(`name${num}`).value || `Agent ${num}`).trim();
+      const presetName = prompt('Save preset as:', n);
+      if (!presetName) return;
+      if (currentUser) {
+        savePresetToServer(presetName, a);
+      } else {
+        presets[presetName] = { name: a.name, soul: a.soul, soulName: a.soulName, brain: a.brain, brainName: a.brainName };
+        localStorage.setItem('phoenix_presets', JSON.stringify(presets));
+        updatePresetsList();
+      }
+    }
+
+    async function savePreset() {
+      const n = $('newPresetName').value.trim();
+      if (!n) return alert('Enter name');
       const a = agents[$('presetAgent').value];
-      
+
       if (currentUser) {
         await savePresetToServer(n, a);
       } else {
-        presets[n] = { name: a.name, soul: a.soul, soulName: a.soulName, brain: a.brain, brainName: a.brainName }; 
-        localStorage.setItem('phoenix_presets', JSON.stringify(presets)); 
+        presets[n] = { name: a.name, soul: a.soul, soulName: a.soulName, brain: a.brain, brainName: a.brainName };
+        localStorage.setItem('phoenix_presets', JSON.stringify(presets));
         updatePresetsList();
       }
-      $('newPresetName').value = ''; 
+      $('newPresetName').value = '';
     }
     
     async function deletePreset(id, name) { 
@@ -729,9 +739,15 @@
       $('anonymousToggle').classList.toggle('on', anonymousMode);
     }
 
+    // Status indicator
+    function updateStatusDot() {
+      const hasKey = !!localStorage.getItem('phoenix_anthropic_key');
+      $('statusDot').style.background = hasKey ? '#22c55e' : '#ef4444';
+    }
+
     // WebSocket
     let battleState = 'idle'; // idle, running, paused, complete
-    function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; $('statusText').textContent = 'Connected'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; $('statusText').textContent = 'Disconnected'; setTimeout(connect, 3000); }; }
+    function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; setTimeout(connect, 3000); }; }
     function handleMessage(d) { 
       switch (d.type) { 
         case 'battle_start': 
@@ -1140,6 +1156,14 @@
       if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
     });
 
+    // Prompt textarea - Enter to start battle
+    $('prompt').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && battleState === 'idle') {
+        e.preventDefault();
+        startBattle();
+      }
+    });
+
     // Event listeners
     $('settingsBtn').onclick = () => { $('settingsPanel').classList.toggle('open'); $('settingsBtn').classList.toggle('active'); $('presetsPanel').classList.remove('open'); $('presetsBtn').classList.remove('active'); };
     $('presetsBtn').onclick = () => { $('presetsPanel').classList.toggle('open'); $('presetsBtn').classList.toggle('active'); $('settingsPanel').classList.remove('open'); $('settingsBtn').classList.remove('active'); };
@@ -1155,6 +1179,7 @@
         $('apiKeyStatus').textContent = '✓ Key saved securely in browser';
         $('apiKeyStatus').className = 'api-key-status saved';
         $('clearApiKey').style.display = 'inline-block';
+        updateStatusDot();
       } else {
         $('apiKeyStatus').textContent = 'Enter a key first';
         $('apiKeyStatus').className = 'api-key-status cleared';
@@ -1166,6 +1191,7 @@
       $('apiKeyStatus').textContent = 'Key removed';
       $('apiKeyStatus').className = 'api-key-status cleared';
       $('clearApiKey').style.display = 'none';
+      updateStatusDot();
     };
     $('toggleKeyVisibility').onclick = () => {
       const input = $('anthropicApiKey');
@@ -1180,7 +1206,6 @@
       $('clearApiKey').style.display = 'inline-block';
     }
     
-    $('savePresetBtn').onclick = savePreset;
     $('presetSelect1').onchange = e => loadPreset(1, e.target.value);
     $('presetSelect2').onchange = e => loadPreset(2, e.target.value);
     $('advancedToggle').onclick = toggleAdvanced;
@@ -1257,9 +1282,10 @@
 
     // Init
     checkAuthCallback();
-    setupUploads(1); 
-    setupUploads(2); 
-    loadConfig(); 
+    setupUploads(1);
+    setupUploads(2);
+    loadConfig();
+    updateStatusDot();
     connect();
     checkAuth();
     loadFromBuilder();
