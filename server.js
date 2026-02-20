@@ -18,14 +18,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'phoenix-arena-dev-secret-change-in
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
+// Ensure uploads directory exists (persistent volume on Railway, local fallback)
+const DATA_DIR = fsSync.existsSync('/data') ? '/data' : path.join(__dirname, 'data');
+const uploadsDir = path.join(DATA_DIR, 'uploads');
 if (!fsSync.existsSync(uploadsDir)) {
   fsSync.mkdirSync(uploadsDir, { recursive: true });
 }
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(uploadsDir));
 app.use(express.static('public'));
 
 // Serve arena page
