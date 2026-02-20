@@ -390,8 +390,8 @@ function upsertUser(data) {
     
     if (existing) {
       // Update - only update fields that user hasn't customized
-      // Check if user has custom avatar (not from GitHub)
-      const hasCustomAvatar = existing.avatar_url && !existing.avatar_url.includes('githubusercontent.com');
+      // Check if user has custom avatar (uploaded to /uploads/)
+      const hasCustomAvatar = existing.avatar_url && existing.avatar_url.startsWith('/uploads/');
       const hasCustomName = existing.name && existing.name !== data.name;
       const hasCustomUsername = existing.username && existing.username !== data.username;
       

@@ -42,6 +42,21 @@
     .notif-btn:hover { color: var(--text); }
     .notif-btn svg { width: 20px; height: 20px; }
     .notif-badge { position: absolute; top: 0; right: 0; background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 600; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .notif-dropdown { display: none; position: fixed; top: 56px; right: 2rem; width: 320px; max-height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1001; overflow: hidden; }
+    .notif-dropdown.active { display: block; }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    .notif-header span { font-weight: 500; font-size: 0.9rem; }
+    .notif-header button { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; }
+    .notif-list { max-height: 340px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .notif-item:hover { background: var(--surface2); }
+    .notif-item.unread { background: rgba(249, 115, 22, 0.05); }
+    .notif-item img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .notif-content { flex: 1; }
+    .notif-text { font-size: 0.85rem; color: var(--text2); }
+    .notif-text strong { color: var(--text); }
+    .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
+    .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
 
     main { max-width: 900px; margin: 0 auto; padding: 2rem; padding-top: 5rem; }
 
@@ -141,7 +156,7 @@
       <a href="/archive" class="active">Archive</a>
       <a href="/guide">Guide</a>
       <a href="/dashboard">Dashboard</a>
-      <button class="notif-btn" id="notifBtn" onclick="window.location='/dashboard'">
+      <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge" id="notifBadge" style="display:none">0</span>
       </button>
@@ -155,6 +170,22 @@
       </a>
     </div>
   </nav>
+  <script>
+  (function(){
+    var t=localStorage.getItem('phoenix_token'),u=localStorage.getItem('phoenix_user');
+    if(t&&u){try{var d=JSON.parse(u);
+      document.getElementById('loginBtn').style.display='none';
+      document.getElementById('userLink').style.display='flex';
+      document.getElementById('userAvatar').src=d.avatar_url||'';
+      document.getElementById('userName').textContent=d.username||'';
+      document.getElementById('notifBtn').style.display='block';
+    }catch(e){}}
+  })();
+  </script>
+  <div class="notif-dropdown" id="notifDropdown">
+    <div class="notif-header"><span>Notifications</span><button onclick="markAllRead()">Mark all read</button></div>
+    <div class="notif-list" id="notifList"><div class="notif-empty">No notifications yet</div></div>
+  </div>
 
   <main id="main"><div class="loading">Loading battle...</div></main>
 
@@ -174,6 +205,7 @@
           const data = await res.json();
           if (data.user) {
             currentUser = data.user;
+            localStorage.setItem('phoenix_user', JSON.stringify(data.user));
             document.getElementById('loginBtn').style.display = 'none';
             document.getElementById('userLink').style.display = 'flex';
             document.getElementById('userAvatar').src = data.user.avatar_url || '';
@@ -196,6 +228,56 @@
         }
       } catch (e) {}
     }
+
+    function toggleNotifications() {
+      const dropdown = document.getElementById('notifDropdown');
+      dropdown.classList.toggle('active');
+      if (dropdown.classList.contains('active')) loadNotifList();
+    }
+    async function loadNotifList() {
+      const t = localStorage.getItem('phoenix_token');
+      if (!t) return;
+      try {
+        const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${t}` } });
+        const notifications = await res.json();
+        const list = document.getElementById('notifList');
+        if (!notifications.length) { list.innerHTML = '<div class="notif-empty">No notifications yet</div>'; return; }
+        list.innerHTML = notifications.map(n => `
+          <div class="notif-item ${n.read ? '' : 'unread'}" onclick="goToNotif(${n.battle_id || 'null'}, '${n.from_username || ''}')">
+            <img src="${n.from_avatar || ''}" alt="" onerror="this.style.display='none'">
+            <div class="notif-content">
+              <div class="notif-text"><strong>@${n.from_username || 'Someone'}</strong> ${n.content}</div>
+              <div class="notif-time">${timeAgo(n.created_at)}</div>
+            </div>
+          </div>`).join('');
+      } catch (e) {}
+    }
+    async function markAllRead() {
+      const t = localStorage.getItem('phoenix_token');
+      if (!t) return;
+      try {
+        await fetch('/api/notifications/read', { method: 'POST', headers: { 'Authorization': `Bearer ${t}` } });
+        document.getElementById('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+      } catch (e) {}
+    }
+    function goToNotif(battleId, username) {
+      document.getElementById('notifDropdown').classList.remove('active');
+      if (battleId) window.location = '/battle/' + battleId;
+      else if (username) window.location = '/profile/' + username;
+    }
+    function timeAgo(ts) {
+      const s = Math.floor(Date.now() / 1000 - ts);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return Math.floor(s / 86400) + 'd ago';
+    }
+    document.addEventListener('click', e => {
+      const dropdown = document.getElementById('notifDropdown');
+      const btn = document.getElementById('notifBtn');
+      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
+    });
     
     async function loadBattle() {
       const main = document.getElementById('main');

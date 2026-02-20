@@ -212,6 +212,18 @@
       </a>
     </div>
   </nav>
+<script>
+(function(){
+  var t=localStorage.getItem('phoenix_token'),u=localStorage.getItem('phoenix_user');
+  if(t&&u){try{var d=JSON.parse(u);
+    document.getElementById('loginBtn').style.display='none';
+    document.getElementById('userLink').style.display='flex';
+    document.getElementById('userAvatar').src=d.avatar_url||'';
+    document.getElementById('userName').textContent=d.username||'';
+    document.getElementById('notifBtn').style.display='block';
+  }catch(e){}}
+})();
+</script>
 
   <!-- Notifications Dropdown -->
   <div class="notif-dropdown" id="notifDropdown">
@@ -394,6 +406,7 @@
         }
         
         currentUser = userData.user;
+        localStorage.setItem('phoenix_user', JSON.stringify(currentUser));
         updateNavAuth(currentUser);
         
         document.getElementById('loginPrompt').style.display = 'none';
