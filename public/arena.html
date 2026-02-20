@@ -70,24 +70,25 @@
     .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
     .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
     
-    /* Arena Controls Bar */
-    .arena-controls { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: 0.75rem 0; 
-      margin-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .arena-controls-left { display: flex; align-items: center; gap: 0.75rem; }
-    .arena-controls-right { display: flex; align-items: center; gap: 0.75rem; }
-    .battle-title-input { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; width: 250px; }
+    .battle-title-input { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
     .battle-title-input:focus { border-color: var(--accent); outline: none; background: var(--surface); }
     .battle-title-input::placeholder { color: var(--text3); }
-    .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+    .nav-left { display: flex; align-items: center; gap: 0.75rem; }
+    .status-indicator { display: flex; align-items: center; gap: 0.4rem; }
+    .dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; flex-shrink: 0; }
+    .status-text { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--text3); letter-spacing: 0.03em; }
+    .status-text.connected { color: var(--success); }
+    .status-text.disconnected { color: #ef4444; }
     .header-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.4rem 0.75rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
     .header-btn:hover { border-color: var(--text3); color: var(--text); }
     .header-btn.active { border-color: var(--accent); color: var(--accent); }
+    .battle-title-row { display: flex; justify-content: center; padding: 0.25rem 0 0.25rem; }
+    .battle-title-row .battle-title-input { width: 340px; text-align: center; font-size: 0.85rem; }
+    .adv-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .adv-field label { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .adv-field select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.5rem; border-radius: 0.25rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; }
+    .adv-field input[type="number"] { width: 72px; }
+    .adv-toggle-wrap { display: flex; align-items: center; height: 30px; }
 
     .panel { display: none; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; }
     .panel.open { display: block; }
@@ -164,17 +165,10 @@
 
     .prompt-config { flex: 2; display: flex; flex-direction: column; gap: 0.5rem; min-width: 280px; }
     .prompt-config h3 { font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); display: flex; align-items: center; gap: 0.75rem; }
-    .prompt-mode-select { }
-    .prompt-mode-select label { font-size: 0.6rem; color: var(--text3); display: block; margin-bottom: 0.25rem; }
-    .prompt-mode-select select { background: var(--bg); border: 1px solid var(--border); color: var(--text2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; cursor: pointer; }
     .mode-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--text3); margin-left: auto; }
     .mode-toggle .toggle { width: 32px; height: 18px; }
     .mode-toggle .toggle::after { width: 12px; height: 12px; }
     .mode-toggle .toggle.on::after { transform: translateX(14px); }
-    .mini-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.6rem; color: var(--text3); }
-    .mini-toggle .toggle { width: 28px; height: 16px; }
-    .mini-toggle .toggle::after { width: 10px; height: 10px; }
-    .mini-toggle .toggle.on::after { transform: translateX(12px); }
     
     .simple-mode { flex: 1; display: flex; flex-direction: column; }
     .simple-mode .shared-prompt { flex: 1; }
@@ -254,8 +248,13 @@
 </head>
 <body>
   <nav>
-    <a href="/" class="logo">PHOENIX ARENA</a>
-    <div class="nav-status"><div class="dot" id="statusDot"></div></div>
+    <div class="nav-left">
+      <a href="/" class="logo">PHOENIX ARENA</a>
+      <div class="status-indicator">
+        <div class="dot" id="statusDot"></div>
+        <span class="status-text disconnected" id="statusText">Connecting...</span>
+      </div>
+    </div>
     <div class="nav-right">
       <a href="/arena" class="active">Arena</a>
       <a href="/builder">Builder</a>
@@ -294,21 +293,6 @@
 </div>
 
   <div class="app">
-    <div class="arena-controls">
-      <div class="arena-controls-left">
-        <input type="text" id="battleTitle" class="battle-title-input" placeholder="Battle title...">
-      </div>
-      <div class="arena-controls-right">
-        <button class="header-btn" id="presetsBtn">Presets</button>
-        <button class="header-btn" id="settingsBtn">Providers</button>
-      </div>
-    </div>
-
-    <div class="panel" id="presetsPanel">
-      <h3>Presets</h3>
-      <div class="presets-list" id="presetsList"><span style="color: var(--text3); font-size: 0.75rem;">No presets saved</span></div>
-    </div>
-
     <div class="panel" id="settingsPanel">
       <h3>Provider Configuration</h3>
       <div class="settings-grid">
@@ -337,6 +321,10 @@
           <div class="settings-status" id="ollamaStatus"></div>
         </div>
       </div>
+    </div>
+
+    <div class="battle-title-row">
+      <input type="text" id="battleTitle" class="battle-title-input" placeholder="Battle title...">
     </div>
 
     <div class="setup">
@@ -397,6 +385,7 @@
       <div class="prompt-config">
         <h3>
           Prompt
+          <button class="header-btn" id="settingsBtn">Providers</button>
           <div class="mode-toggle">
             <div class="toggle" id="advancedToggle"></div>
             <span>Advanced</span>
@@ -413,11 +402,7 @@
         <!-- ADVANCED MODE (hidden by default) -->
         <div class="advanced-mode" id="advancedMode" style="display:none">
           <div class="advanced-row">
-            <div class="mini-toggle">
-              <div class="toggle" id="anonymousToggle"></div>
-              <span>Anonymous</span>
-            </div>
-            <div class="prompt-mode-select">
+            <div class="adv-field">
               <label>Prompt Mode</label>
               <select id="promptMode">
                 <option value="single">Single</option>
@@ -425,9 +410,15 @@
                 <option value="shared-split">Shared + Split</option>
               </select>
             </div>
-            <div class="max-words-field">
+            <div class="adv-field">
               <label>Max Words</label>
               <input type="number" id="maxWords" value="" min="1" max="500" placeholder="∞">
+            </div>
+            <div class="adv-field">
+              <label>Anonymous</label>
+              <div class="adv-toggle-wrap">
+                <div class="toggle" id="anonymousToggle"></div>
+              </div>
             </div>
           </div>
           
@@ -747,7 +738,7 @@
 
     // WebSocket
     let battleState = 'idle'; // idle, running, paused, complete
-    function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; setTimeout(connect, 3000); }; }
+    function connect() { ws = new WebSocket(API.replace('http', 'ws')); ws.onopen = () => { $('statusDot').style.background = '#22c55e'; $('statusText').textContent = 'Connected'; $('statusText').className = 'status-text connected'; }; ws.onmessage = e => handleMessage(JSON.parse(e.data)); ws.onclose = () => { $('statusDot').style.background = '#ef4444'; $('statusText').textContent = 'Disconnected'; $('statusText').className = 'status-text disconnected'; setTimeout(connect, 3000); }; }
     function handleMessage(d) { 
       switch (d.type) { 
         case 'battle_start': 
@@ -1165,8 +1156,7 @@
     });
 
     // Event listeners
-    $('settingsBtn').onclick = () => { $('settingsPanel').classList.toggle('open'); $('settingsBtn').classList.toggle('active'); $('presetsPanel').classList.remove('open'); $('presetsBtn').classList.remove('active'); };
-    $('presetsBtn').onclick = () => { $('presetsPanel').classList.toggle('open'); $('presetsBtn').classList.toggle('active'); $('settingsPanel').classList.remove('open'); $('settingsBtn').classList.remove('active'); };
+    $('settingsBtn').onclick = () => { $('settingsPanel').classList.toggle('open'); $('settingsBtn').classList.toggle('active'); };
     $('anthropicToggle').onclick = () => { config.providers.anthropic.enabled = !config.providers.anthropic.enabled; updateConfigUI(); saveConfig(); };
     $('ollamaToggle').onclick = () => { config.providers.ollama.enabled = !config.providers.ollama.enabled; updateConfigUI(); saveConfig(); };
     $('saveEndpoint').onclick = () => { config.providers.ollama.endpoint = $('ollamaEndpoint').value; saveConfig(); };
