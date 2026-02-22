@@ -94,6 +94,7 @@ async function init() {
   
   try {
     db = setupDatabase('/data/arena.db');
+    db.pragma('foreign_keys = ON');
     setupUserTable();
   } catch (e) {
     console.log('Running without database');
@@ -342,7 +343,7 @@ function setupUserTable() {
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        github_id INTEGER UNIQUE NOT NULL,
+        github_id  INTEGER UNIQUE,
         username TEXT NOT NULL,
         avatar_url TEXT,
         name TEXT,
@@ -387,8 +388,9 @@ function setupUserTable() {
       const cols = db.prepare("PRAGMA table_info(users)").all();
       const githubCol = cols.find(c => c.name === 'github_id');
       if (githubCol && githubCol.notnull === 1) {
-        db.exec(`DROP TABLE IF EXISTS users_temp`);
         db.exec(`
+          BEGIN;
+          DROP TABLE IF EXISTS users_temp;
           CREATE TABLE users_temp (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             github_id  INTEGER UNIQUE,
@@ -403,6 +405,7 @@ function setupUserTable() {
           INSERT OR IGNORE INTO users_temp SELECT id, github_id, username, avatar_url, name, bio, email, created_at, updated_at FROM users;
           DROP TABLE users;
           ALTER TABLE users_temp RENAME TO users;
+          COMMIT;
         `);
         console.log('Migrated users table: github_id is now nullable');
       }
