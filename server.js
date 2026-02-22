@@ -250,6 +250,37 @@ app.get('/auth/google/callback', async (req, res) => {
   res.redirect('/?error=google_not_implemented');
 });
 
+// Email login — Step 1: Request magic link
+// Activate by setting EMAIL_HOST + EMAIL_USER + EMAIL_PASS, or SENDGRID_API_KEY.
+// Magic link flow:
+//   1. Generate token: jwt.sign({ email }, JWT_SECRET, { expiresIn: '15m' })
+//   2. Store in email_tokens table (email, token_hash, used, expires_at)
+//   3. Send email with {BASE_URL}/auth/email/verify?token={token}
+app.post('/auth/email/request', (req, res) => {
+  const emailConfigured = process.env.EMAIL_HOST || process.env.SENDGRID_API_KEY;
+  if (!emailConfigured) {
+    return res.status(503).json({
+      error: 'Email login not configured',
+      setup: 'Set EMAIL_HOST + EMAIL_USER + EMAIL_PASS (SMTP), or SENDGRID_API_KEY'
+    });
+  }
+  res.status(501).json({ error: 'Email login not yet implemented' });
+});
+
+// Email login — Step 2: Verify magic link token
+// TODO: Full implementation:
+//   1. Verify and decode JWT token from query param
+//   2. Mark token as used in email_tokens table
+//   3. Call upsertUser('email', email, { username: email.split('@')[0], ... })
+//   4. Generate session JWT and redirect to /?token={jwt}
+app.get('/auth/email/verify', (req, res) => {
+  const emailConfigured = process.env.EMAIL_HOST || process.env.SENDGRID_API_KEY;
+  if (!emailConfigured) {
+    return res.redirect('/?error=email_not_configured');
+  }
+  res.redirect('/?error=email_login_not_implemented');
+});
+
 // Get current user
 app.get('/auth/me', (req, res) => {
   if (req.user && db) {
