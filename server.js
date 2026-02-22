@@ -244,11 +244,74 @@ app.get('/auth/google', (req, res) => {
 //   2. Fetch profile: GET https://www.googleapis.com/oauth2/v3/userinfo
 //   3. Call upsertUser('google', profile.sub, { username, avatar_url, name, email })
 //   4. Generate JWT and redirect to /?token={jwt}
-app.get('/auth/google/callback', (req, res) => {
+app.get('/auth/google/callback', async (req, res) => {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     return res.redirect('/?error=google_not_configured');
   }
-  res.redirect('/?error=google_not_implemented');
+
+  const { code } = req.query;
+
+  if (!code) {
+    return res.redirect('/?error=no_code');
+  }
+
+  try {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const redirectUri = `${protocol}://${req.get('host')}/auth/google/callback`;
+
+    // Exchange code for access token
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        code,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code'
+      })
+    });
+
+    const tokenData = await tokenRes.json();
+
+    if (tokenData.error) {
+      console.error('Google token error:', tokenData);
+      return res.redirect('/?error=token_failed');
+    }
+
+    // Get user info
+    const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    const googleUser = await userRes.json();
+
+    // Upsert user in database
+    const user = upsertUser('google', googleUser.sub, {
+      username: googleUser.email.split('@')[0],
+      avatar_url: googleUser.picture,
+      name: googleUser.name,
+      email: googleUser.email
+    });
+
+    // Generate JWT
+    const token = jwt.sign({
+      id: user.id,
+      github_id: user.github_id,
+      username: user.username,
+      avatar_url: user.avatar_url
+    }, JWT_SECRET, { expiresIn: '30d' });
+
+    // Redirect to frontend with token
+    res.redirect(`/?token=${token}`);
+
+  } catch (e) {
+    console.error('Google OAuth error:', e);
+    res.redirect('/?error=oauth_failed');
+  }
 });
 
 // Email login — Step 1: Request magic link
