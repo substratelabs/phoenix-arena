@@ -11,6 +11,27 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
 const { Arena, setupDatabase } = require('./arena');
+const nodemailer = require('nodemailer');
+
+function createTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+  });
+}
+
+async function sendMagicLinkEmail(toEmail, magicUrl) {
+  const transporter = createTransporter();
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: toEmail,
+    subject: 'Sign in to Phoenix Arena',
+    text: `Click this link to sign in (expires in 15 minutes):\n\n${magicUrl}`,
+    html: `<p>Click the link below to sign in. It expires in 15 minutes.</p><p><a href="${magicUrl}">${magicUrl}</a></p>`
+  });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -315,34 +336,63 @@ app.get('/auth/google/callback', async (req, res) => {
 });
 
 // Email login — Step 1: Request magic link
-// Activate by setting EMAIL_HOST + EMAIL_USER + EMAIL_PASS, or SENDGRID_API_KEY.
-// Magic link flow:
-//   1. Generate token: jwt.sign({ email }, JWT_SECRET, { expiresIn: '15m' })
-//   2. Store in email_tokens table (email, token_hash, used, expires_at)
-//   3. Send email with {BASE_URL}/auth/email/verify?token={token}
-app.post('/auth/email/request', (req, res) => {
-  const emailConfigured = process.env.EMAIL_HOST || process.env.SENDGRID_API_KEY;
-  if (!emailConfigured) {
-    return res.status(503).json({
-      error: 'Email login not configured',
-      setup: 'Set EMAIL_HOST + EMAIL_USER + EMAIL_PASS (SMTP), or SENDGRID_API_KEY'
-    });
+app.post('/auth/email/request', async (req, res) => {
+  if (!process.env.EMAIL_HOST) {
+    return res.status(503).json({ error: 'Email login not configured' });
   }
-  res.status(501).json({ error: 'Email login not yet implemented' });
+  const { email } = req.body;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+  try {
+    const token = jwt.sign({ email, type: 'email-magic' }, JWT_SECRET, { expiresIn: '15m' });
+    const tokenHash = require('crypto').createHash('sha256').update(token).digest('hex');
+    const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60;
+    db.prepare('INSERT INTO email_tokens (email, token_hash, expires_at) VALUES (?, ?, ?)')
+      .run(email, tokenHash, expiresAt);
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const baseUrl = `${protocol}://${req.get('host')}`;
+    const magicUrl = `${baseUrl}/auth/email/verify?token=${encodeURIComponent(token)}`;
+    await sendMagicLinkEmail(email, magicUrl);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Email request error:', e);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
 });
 
 // Email login — Step 2: Verify magic link token
-// TODO: Full implementation:
-//   1. Verify and decode JWT token from query param
-//   2. Mark token as used in email_tokens table
-//   3. Call upsertUser('email', email, { username: email.split('@')[0], ... })
-//   4. Generate session JWT and redirect to /?token={jwt}
 app.get('/auth/email/verify', (req, res) => {
-  const emailConfigured = process.env.EMAIL_HOST || process.env.SENDGRID_API_KEY;
-  if (!emailConfigured) {
-    return res.redirect('/?error=email_not_configured');
+  const { token } = req.query;
+  if (!token) return res.redirect('/?error=no_token');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.type !== 'email-magic') return res.redirect('/?error=invalid_token');
+    const tokenHash = require('crypto').createHash('sha256').update(token).digest('hex');
+    const now = Math.floor(Date.now() / 1000);
+    const record = db.prepare(
+      'SELECT * FROM email_tokens WHERE token_hash = ? AND used = 0 AND expires_at > ?'
+    ).get(tokenHash, now);
+    if (!record) return res.redirect('/?error=token_expired');
+    db.prepare('UPDATE email_tokens SET used = 1 WHERE id = ?').run(record.id);
+    const email = decoded.email;
+    const user = upsertUser('email', email, {
+      username: email.split('@')[0].replace(/[^a-z0-9_]/gi, '_'),
+      avatar_url: null,
+      name: null,
+      email
+    });
+    const sessionToken = jwt.sign({
+      id: user.id,
+      github_id: user.github_id,
+      username: user.username,
+      avatar_url: user.avatar_url
+    }, JWT_SECRET, { expiresIn: '30d' });
+    res.redirect(`/?token=${sessionToken}`);
+  } catch (e) {
+    console.error('Email verify error:', e);
+    res.redirect('/?error=token_invalid');
   }
-  res.redirect('/?error=email_login_not_implemented');
 });
 
 // Get current user
@@ -559,6 +609,15 @@ function setupUserTable() {
       )
     `);
     
+    db.prepare(`CREATE TABLE IF NOT EXISTS email_tokens (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      email      TEXT NOT NULL,
+      token_hash TEXT NOT NULL,
+      used       INTEGER DEFAULT 0,
+      expires_at INTEGER NOT NULL,
+      created_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )`).run();
+
     console.log('User tables ready');
   } catch (e) {
     console.error('Failed to setup user tables:', e.message);

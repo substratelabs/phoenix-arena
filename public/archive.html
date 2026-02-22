@@ -140,16 +140,34 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge" id="notifBadge" style="display:none">0</span>
       </button>
-      <a href="/auth/github" class="login-btn" id="loginBtn">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        Sign in
-      </a>
+      <button class="login-btn" id="loginBtn" onclick="showLoginModal()">Sign in</button>
       <a href="/dashboard" class="user-link" id="userLink" style="display:none">
         <img class="user-avatar" id="userAvatar" src="" alt="">
         <span id="userName"></span>
       </a>
     </div>
   </nav>
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var error = params.get('error');
+  if (token) {
+    localStorage.setItem('phoenix_token', token);
+    var returnUrl = localStorage.getItem('phoenix_return_url');
+    localStorage.removeItem('phoenix_return_url');
+    if (returnUrl && returnUrl !== window.location.href) {
+      window.location.replace(returnUrl);
+      return;
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  if (error) {
+    console.error('Auth error:', error);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+</script>
   <script>
   (function(){
     var t=localStorage.getItem('phoenix_token'),u=localStorage.getItem('phoenix_user');
@@ -457,13 +475,13 @@
               '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>',
               'Sign in with GitHub',
             '</button>',
-            '<button disabled style="display:flex;align-items:center;justify-content:center;gap:0.6rem;width:100%;padding:0.65rem 1rem;background:transparent;color:#52525b;border:1px solid #27272a;border-radius:0.25rem;font-size:0.875rem;font-weight:500;cursor:not-allowed;">',
-              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-              'Google <span style="font-size:0.7rem;margin-left:0.2rem;">coming soon</span>',
+            '<button onclick="authModalGoogle()" style="display:flex;align-items:center;justify-content:center;gap:0.6rem;width:100%;padding:0.65rem 1rem;background:#fafafa;color:#3c4043;border:1px solid #dadce0;border-radius:0.25rem;font-size:0.875rem;font-weight:500;cursor:pointer;">',
+              '<svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>',
+              'Sign in with Google',
             '</button>',
-            '<button disabled style="display:flex;align-items:center;justify-content:center;gap:0.6rem;width:100%;padding:0.65rem 1rem;background:transparent;color:#52525b;border:1px solid #27272a;border-radius:0.25rem;font-size:0.875rem;font-weight:500;cursor:not-allowed;">',
+            '<button onclick="authModalEmail()" style="display:flex;align-items:center;justify-content:center;gap:0.6rem;width:100%;padding:0.65rem 1rem;background:transparent;color:#fafafa;border:1px solid #27272a;border-radius:0.25rem;font-size:0.875rem;font-weight:500;cursor:pointer;">',
               '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>',
-              'Email <span style="font-size:0.7rem;margin-left:0.2rem;">coming soon</span>',
+              'Sign in with Email',
             '</button>',
           '</div>',
         '</div>'
@@ -483,6 +501,72 @@
     function authModalGitHub() {
       localStorage.setItem('phoenix_return_url', window.location.href);
       window.location.href = '/auth/github';
+    }
+
+    function authModalGoogle() {
+      localStorage.setItem('phoenix_return_url', window.location.href);
+      window.location.href = '/auth/google';
+    }
+
+    function authModalEmail() {
+      var inner = document.querySelector('#authModal > div');
+      if (!inner) return;
+      inner.innerHTML = [
+        '<button onclick="closeAuthModal()" style="position:absolute;top:0.75rem;right:0.75rem;background:none;border:none;color:#a1a1aa;cursor:pointer;font-size:1.1rem;line-height:1;padding:0.25rem;">&#10005;</button>',
+        '<h2 style="font-family:\'JetBrains Mono\',monospace;font-size:1rem;font-weight:600;color:#fafafa;margin-bottom:0.35rem;">Sign in with Email</h2>',
+        '<p style="font-size:0.8rem;color:#a1a1aa;margin-bottom:1.5rem;">We\'ll send you a magic link to sign in.</p>',
+        '<div style="display:flex;flex-direction:column;gap:0.75rem;">',
+          '<input id="authEmailInput" type="email" placeholder="you@example.com" style="width:100%;padding:0.65rem 1rem;background:#18181b;color:#fafafa;border:1px solid #27272a;border-radius:0.25rem;font-size:0.875rem;outline:none;" />',
+          '<button id="authEmailSubmitBtn" onclick="authModalEmailSubmit()" style="width:100%;padding:0.65rem 1rem;background:#f97316;color:#0a0a0b;border:none;border-radius:0.25rem;font-size:0.875rem;font-weight:600;cursor:pointer;">Send magic link</button>',
+          '<div id="authEmailMsg" style="font-size:0.8rem;text-align:center;min-height:1.2em;"></div>',
+        '</div>',
+        '<p style="text-align:center;margin-top:1rem;"><button onclick="closeAuthModal();showLoginModal()" style="background:none;border:none;color:#a1a1aa;font-size:0.8rem;cursor:pointer;">&#8592; Back to sign in options</button></p>'
+      ].join('');
+      var input = document.getElementById('authEmailInput');
+      if (input) {
+        input.addEventListener('keydown', function(e) { if (e.key === 'Enter') authModalEmailSubmit(); });
+        input.focus();
+      }
+    }
+
+    async function authModalEmailSubmit() {
+      var input = document.getElementById('authEmailInput');
+      var btn = document.getElementById('authEmailSubmitBtn');
+      var msg = document.getElementById('authEmailMsg');
+      if (!input || !btn || !msg) return;
+      var email = input.value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Please enter a valid email address.';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Sending\u2026';
+      msg.textContent = '';
+      try {
+        var res = await fetch('/auth/email/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+          btn.style.display = 'none';
+          input.style.display = 'none';
+          msg.style.color = '#22c55e';
+          msg.textContent = 'Check your inbox! The link expires in 15 minutes.';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Send magic link';
+          msg.style.color = '#ef4444';
+          msg.textContent = data.error || 'Something went wrong. Please try again.';
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Send magic link';
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Network error. Please try again.';
+      }
     }
   </script>
   <!-- End Auth Modal -->
