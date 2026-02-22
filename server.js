@@ -243,7 +243,7 @@ app.get('/auth/google', (req, res) => {
 //   2. Fetch profile: GET https://www.googleapis.com/oauth2/v3/userinfo
 //   3. Call upsertUser('google', profile.sub, { username, avatar_url, name, email })
 //   4. Generate JWT and redirect to /?token={jwt}
-app.get('/auth/google/callback', async (req, res) => {
+app.get('/auth/google/callback', (req, res) => {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     return res.redirect('/?error=google_not_configured');
   }
@@ -387,8 +387,9 @@ function setupUserTable() {
       const cols = db.prepare("PRAGMA table_info(users)").all();
       const githubCol = cols.find(c => c.name === 'github_id');
       if (githubCol && githubCol.notnull === 1) {
+        db.exec(`DROP TABLE IF EXISTS users_temp`);
         db.exec(`
-          CREATE TABLE IF NOT EXISTS users_temp (
+          CREATE TABLE users_temp (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             github_id  INTEGER UNIQUE,
             username   TEXT NOT NULL,
