@@ -193,8 +193,7 @@ app.get('/auth/github/callback', async (req, res) => {
     const githubUser = await userRes.json();
     
     // Upsert user in database
-    const user = upsertUser({
-      github_id: githubUser.id,
+    const user = upsertUser('github', githubUser.id, {
       username: githubUser.login,
       avatar_url: githubUser.avatar_url,
       name: githubUser.name
