@@ -17,6 +17,8 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'phoenix-arena-dev-secret-change-in-prod';
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 // Ensure uploads directory exists (persistent volume on Railway, local fallback)
 const DATA_DIR = fsSync.existsSync('/data') ? '/data' : path.join(__dirname, 'data');
@@ -214,6 +216,38 @@ app.get('/auth/github/callback', async (req, res) => {
     console.error('GitHub OAuth error:', e);
     res.redirect('/?error=oauth_failed');
   }
+});
+
+// Google OAuth — Step 1: Redirect to Google
+// Activate by setting GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET env vars.
+// Register redirect URI {BASE_URL}/auth/google/callback in Google Cloud Console.
+app.get('/auth/google', (req, res) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.redirect('/?error=google_not_configured');
+  }
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const redirectUri = `${protocol}://${req.get('host')}/auth/google/callback`;
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'online'
+  });
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+});
+
+// Google OAuth — Step 2: Handle callback
+// TODO: Full implementation:
+//   1. Exchange code: POST https://oauth2.googleapis.com/token
+//   2. Fetch profile: GET https://www.googleapis.com/oauth2/v3/userinfo
+//   3. Call upsertUser('google', profile.sub, { username, avatar_url, name, email })
+//   4. Generate JWT and redirect to /?token={jwt}
+app.get('/auth/google/callback', async (req, res) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.redirect('/?error=google_not_configured');
+  }
+  res.redirect('/?error=google_not_implemented');
 });
 
 // Get current user
