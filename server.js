@@ -292,7 +292,31 @@ function setupUserTable() {
     try {
       db.exec('ALTER TABLE users ADD COLUMN bio TEXT');
     } catch (e) {} // Column might already exist
-    
+
+    // Add email column if not exists
+    try {
+      db.exec('ALTER TABLE users ADD COLUMN email TEXT');
+    } catch (e) {} // Column might already exist
+
+    // Auth providers table — supports GitHub, Google, email
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS auth_providers (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        provider    TEXT NOT NULL,
+        provider_id TEXT NOT NULL,
+        created_at  INTEGER DEFAULT (strftime('%s', 'now')),
+        UNIQUE(provider, provider_id)
+      )
+    `);
+
+    // Migrate existing GitHub users (idempotent via INSERT OR IGNORE)
+    db.exec(`
+      INSERT OR IGNORE INTO auth_providers (user_id, provider, provider_id, created_at)
+      SELECT id, 'github', CAST(github_id AS TEXT), created_at
+      FROM users WHERE github_id IS NOT NULL
+    `);
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS user_presets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
