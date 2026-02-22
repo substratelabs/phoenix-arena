@@ -388,6 +388,7 @@ function setupUserTable() {
       const cols = db.prepare("PRAGMA table_info(users)").all();
       const githubCol = cols.find(c => c.name === 'github_id');
       if (githubCol && githubCol.notnull === 1) {
+        db.pragma('foreign_keys = OFF');
         db.exec(`
           BEGIN;
           DROP TABLE IF EXISTS users_temp;
@@ -407,6 +408,7 @@ function setupUserTable() {
           ALTER TABLE users_temp RENAME TO users;
           COMMIT;
         `);
+        db.pragma('foreign_keys = ON');
         console.log('Migrated users table: github_id is now nullable');
       }
     } catch (e) {
