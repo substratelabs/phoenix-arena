@@ -3,3 +3,4 @@ CLAUDE_CONTEXT.md
 .claude
 .claude.json
 node_modules/
+.worktrees/
