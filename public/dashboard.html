@@ -259,7 +259,7 @@
   document.addEventListener('click', function(e) {
     var toggle = document.getElementById('menuToggle');
     var navEl = document.getElementById('nav');
-    if (toggle && toggle.checked && navEl && !navEl.contains(e.target)) {
+    if (toggle && toggle.checked && navEl && !navEl.contains(e.target) && e.target !== toggle) {
       toggle.checked = false;
     }
   });
