@@ -432,46 +432,63 @@ function setupUserTable() {
   }
 }
 
-function upsertUser(data) {
+// Provider-agnostic user upsert.
+// provider: 'github' | 'google' | 'email'
+// providerId: string (github numeric id, google sub, or email address)
+// profileData: { username, avatar_url, name, email? }
+function upsertUser(provider, providerId, profileData) {
   if (!db) {
-    // Return fake user for dev without db
-    return { id: 1, ...data };
+    return { id: 1, provider, username: profileData.username, ...profileData };
   }
-  
+
   try {
-    // Try to find existing user
-    const existing = db.prepare('SELECT * FROM users WHERE github_id = ?').get(data.github_id);
-    
+    const providerIdStr = String(providerId);
+
+    // Look up existing user via auth_providers
+    const existing = db.prepare(`
+      SELECT users.* FROM users
+      JOIN auth_providers ON users.id = auth_providers.user_id
+      WHERE auth_providers.provider = ? AND auth_providers.provider_id = ?
+    `).get(provider, providerIdStr);
+
     if (existing) {
-      // Update - only update fields that user hasn't customized
-      // Check if user has custom avatar (uploaded to /uploads/)
+      // Respect user customisations
       const hasCustomAvatar = existing.avatar_url && existing.avatar_url.startsWith('/uploads/');
-      const hasCustomName = existing.name && existing.name !== data.name;
-      const hasCustomUsername = existing.username && existing.username !== data.username;
-      
-      // Only update GitHub-synced fields if user hasn't customized them
-      const newAvatarUrl = hasCustomAvatar ? existing.avatar_url : data.avatar_url;
-      const newName = hasCustomName ? existing.name : data.name;
-      // Keep username if customized, otherwise use GitHub username
-      const newUsername = hasCustomUsername ? existing.username : data.username;
-      
-      db.prepare(`
-        UPDATE users SET updated_at = strftime('%s', 'now')
-        WHERE github_id = ?
-      `).run(data.github_id);
-      
+      const hasCustomName = existing.name && existing.name !== profileData.name;
+      const hasCustomUsername = existing.username && existing.username !== profileData.username;
+
+      const newAvatarUrl = hasCustomAvatar ? existing.avatar_url : profileData.avatar_url;
+      const newName = hasCustomName ? existing.name : (profileData.name || existing.name);
+      const newUsername = hasCustomUsername ? existing.username : profileData.username;
+
+      db.prepare(`UPDATE users SET updated_at = strftime('%s', 'now') WHERE id = ?`).run(existing.id);
+
       return { ...existing, avatar_url: newAvatarUrl, name: newName, username: newUsername };
     } else {
-      // Insert
+      // Create new user
       const result = db.prepare(`
-        INSERT INTO users (github_id, username, avatar_url, name) VALUES (?, ?, ?, ?)
-      `).run(data.github_id, data.username, data.avatar_url, data.name);
-      
-      return { id: result.lastInsertRowid, ...data };
+        INSERT INTO users (github_id, username, avatar_url, name, email)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(
+        provider === 'github' ? Number(providerId) : null,
+        profileData.username,
+        profileData.avatar_url,
+        profileData.name,
+        profileData.email || null
+      );
+
+      const userId = result.lastInsertRowid;
+
+      // Register the auth provider
+      db.prepare(
+        `INSERT OR IGNORE INTO auth_providers (user_id, provider, provider_id) VALUES (?, ?, ?)`
+      ).run(userId, provider, providerIdStr);
+
+      return { id: userId, ...profileData };
     }
   } catch (e) {
     console.error('User upsert error:', e.message);
-    return { id: 0, ...data };
+    return { id: 0, ...profileData };
   }
 }
 
