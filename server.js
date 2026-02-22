@@ -317,6 +317,34 @@ function setupUserTable() {
       FROM users WHERE github_id IS NOT NULL
     `);
 
+    // Make github_id nullable (required for Google/email users)
+    // SQLite cannot DROP NOT NULL — must rebuild table
+    try {
+      const cols = db.prepare("PRAGMA table_info(users)").all();
+      const githubCol = cols.find(c => c.name === 'github_id');
+      if (githubCol && githubCol.notnull === 1) {
+        db.exec(`
+          CREATE TABLE IF NOT EXISTS users_temp (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            github_id  INTEGER UNIQUE,
+            username   TEXT NOT NULL,
+            avatar_url TEXT,
+            name       TEXT,
+            bio        TEXT,
+            email      TEXT,
+            created_at INTEGER DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+          );
+          INSERT OR IGNORE INTO users_temp SELECT id, github_id, username, avatar_url, name, bio, email, created_at, updated_at FROM users;
+          DROP TABLE users;
+          ALTER TABLE users_temp RENAME TO users;
+        `);
+        console.log('Migrated users table: github_id is now nullable');
+      }
+    } catch (e) {
+      console.error('Migration error (github_id nullable):', e.message);
+    }
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS user_presets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
