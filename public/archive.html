@@ -67,8 +67,20 @@
     .notif-time { font-size: 0.7rem; color: var(--text3); margin-top: 0.25rem; }
     .notif-empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
 
-    .container { max-width: 1100px; margin: 0 auto; padding: 2rem; padding-top: 5rem; display: grid; grid-template-columns: 1fr 280px; gap: 2rem; }
-    @media (max-width: 800px) { .container { grid-template-columns: 1fr; } .sidebar { order: -1; } }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; padding-top: 5rem; }
+    @media (min-width: 1100px) { body { padding-right: 296px; } }
+
+    .sidebar-fixed {
+      position: fixed;
+      top: calc(56px + 1.5rem);
+      right: 1.5rem;
+      width: 260px;
+      max-height: calc(100vh - 56px - 3rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    @media (max-width: 1099px) { .sidebar-fixed { display: none; } }
 
     .main-content { min-width: 0; }
     .page-header { margin-bottom: 1.5rem; }
@@ -81,14 +93,21 @@
     .search-bar input { flex: 1; background: none; border: none; color: var(--text); font-size: 0.9rem; outline: none; }
     .search-bar input::placeholder { color: var(--text3); }
 
-    .category-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .category-tab { padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text2); cursor: pointer; border: 1px solid var(--border); border-radius: 2rem; background: transparent; transition: all 0.2s; }
-    .category-tab:hover { border-color: var(--text3); color: var(--text); }
-    .category-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .sort-dropdown { position: relative; display: inline-block; margin-bottom: 1.5rem; }
+    .sort-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.9rem; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 0.375rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; letter-spacing: 0.03em; }
+    .sort-btn:hover { border-color: var(--text3); }
+    .sort-btn.open { border-color: var(--accent); background: var(--surface2); color: var(--accent); }
+    .sort-chevron { width: 13px; height: 13px; color: var(--text3); transition: transform 0.25s ease, color 0.2s; flex-shrink: 0; }
+    .sort-btn.open .sort-chevron { transform: rotate(180deg); color: var(--accent); }
+    .sort-menu { position: absolute; top: calc(100% + 5px); left: 0; min-width: 130px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.55); z-index: 200; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; }
+    .sort-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .sort-option { padding: 0.5rem 0.75rem; border-radius: 0.25rem; background: none; border: none; color: var(--text2); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; cursor: pointer; text-align: left; transition: background 0.15s, color 0.15s; letter-spacing: 0.03em; width: 100%; }
+    .sort-option:hover { background: var(--surface2); color: var(--text); }
+    .sort-option.active { color: var(--accent); background: rgba(249, 115, 22, 0.09); }
 
     .archive-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s; }
-    .archive-entry:hover { border-color: var(--accent); transform: translateX(4px); }
+    .archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem 1.25rem; cursor: pointer; transition: transform 200ms ease, border-color 200ms ease; }
+    .archive-entry:hover { border-color: #f97316; transform: translateY(-2px); }
     .archive-entry h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text); }
     .archive-entry .meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--text3); align-items: center; margin-bottom: 0.5rem; }
     .models { background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: var(--text2); }
@@ -113,7 +132,7 @@
     .creator-item .handle { font-size: 0.7rem; color: var(--text3); }
     .creator-item .count { font-size: 0.7rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
 
-    footer { grid-column: 1 / -1; padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
     footer p { font-size: 0.75rem; color: var(--text3); }
     footer a { color: var(--text2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
@@ -205,33 +224,37 @@
     <div class="notif-list" id="notifList"><div class="notif-empty">No notifications</div></div>
   </div>
 
+  <aside class="sidebar-fixed">
+    <div class="sidebar-section">
+      <h3>Top Creators</h3>
+      <div id="topCreators"><div style="color: var(--text3); font-size: 0.8rem;">Loading...</div></div>
+    </div>
+  </aside>
+
   <div class="container">
-    <div class="main-content">
-      <div class="page-header">
-        <h1>Archive</h1>
-        <p>Published battles and AI conversations from the community.</p>
-      </div>
-
-      <div class="search-bar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="searchInput" placeholder="Search battles, users, or content...">
-      </div>
-
-      <div class="category-tabs">
-        <button class="category-tab active" data-sort="newest">Newest</button>
-        <button class="category-tab" data-sort="oldest">Oldest</button>
-        <button class="category-tab" data-sort="popular">Popular</button>
-      </div>
-
-      <div class="archive-list" id="archiveList"><div class="empty-state">Loading...</div></div>
+    <div class="page-header">
+      <h1>Archive</h1>
+      <p>Published battles and AI conversations from the community.</p>
     </div>
 
-    <div class="sidebar">
-      <div class="sidebar-section">
-        <h3>Top Creators</h3>
-        <div id="topCreators"><div style="color: var(--text3); font-size: 0.8rem;">Loading...</div></div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search battles, users, or content...">
+    </div>
+
+    <div class="sort-dropdown" id="sortDropdown">
+      <button class="sort-btn" id="sortBtn" onclick="toggleSortDropdown()">
+        <span id="sortLabel">Newest</span>
+        <svg class="sort-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="sort-menu" id="sortMenu">
+        <button class="sort-option active" data-sort="newest">Newest</button>
+        <button class="sort-option" data-sort="oldest">Oldest</button>
+        <button class="sort-option" data-sort="popular">Popular</button>
       </div>
     </div>
+
+    <div class="archive-list" id="archiveList"><div class="empty-state">Loading...</div></div>
 
     <footer><p>SUBSTRATE · <a href="https://github.com/substrate-labs" target="_blank">github.com/substrate-labs</a></p></footer>
   </div>
@@ -315,6 +338,12 @@
       const dropdown = document.getElementById('notifDropdown');
       const btn = document.getElementById('notifBtn');
       if (!dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.remove('active');
+
+      const sortDd = document.getElementById('sortDropdown');
+      if (sortDd && !sortDd.contains(e.target)) {
+        document.getElementById('sortMenu').classList.remove('open');
+        document.getElementById('sortBtn').classList.remove('open');
+      }
     });
     
     async function loadArchive() {
@@ -423,11 +452,22 @@
       }, 200);
     });
     
-    document.querySelectorAll('.category-tab').forEach(tab => {
-      tab.onclick = () => {
-        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentSort = tab.dataset.sort;
+    function toggleSortDropdown() {
+      const btn = document.getElementById('sortBtn');
+      const menu = document.getElementById('sortMenu');
+      const isOpen = menu.classList.contains('open');
+      if (isOpen) { menu.classList.remove('open'); btn.classList.remove('open'); }
+      else { menu.classList.add('open'); btn.classList.add('open'); }
+    }
+
+    document.querySelectorAll('.sort-option').forEach(opt => {
+      opt.onclick = () => {
+        document.querySelectorAll('.sort-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        currentSort = opt.dataset.sort;
+        document.getElementById('sortLabel').textContent = opt.textContent;
+        document.getElementById('sortMenu').classList.remove('open');
+        document.getElementById('sortBtn').classList.remove('open');
         if (currentQuery) {
           const filtered = allEntries.filter(e => (e.title||'').toLowerCase().includes(currentQuery) || (e.username||'').toLowerCase().includes(currentQuery) || (e.previewText||'').toLowerCase().includes(currentQuery));
           renderEntries(filtered, currentQuery);
