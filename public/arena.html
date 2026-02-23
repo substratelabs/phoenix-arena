@@ -215,7 +215,7 @@
     .btn.secondary:hover { border-color: var(--text2); }
 
     .arena { display: flex; gap: 1.25rem; }
-    .agent-panel { flex: 1; min-height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; display: flex; flex-direction: column; overflow: hidden; }
+    .agent-panel { flex: 1; min-height: 400px; height: calc(100vh - 520px); background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; display: flex; flex-direction: column; overflow: hidden; }
     .agent-panel.a { border-top: 2px solid var(--agent1); }
     .agent-panel.b { border-top: 2px solid var(--agent2); }
     .agent-header { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -234,21 +234,22 @@
     .agent-panel.b .message { border-left-color: var(--agent2); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .message-meta { font-size: 0.6rem; color: var(--text3); margin-top: 0.5rem; }
-    .divider { width: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; }
+    .action-text { font-style: italic; color: #52525b; font-size: 0.72rem; }
+    .divider { width: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; }
     .turn-display { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text3); text-align: center; }
-    .turn-display .current { font-size: 1.4rem; color: var(--accent); }
+    .turn-display .current { font-size: 1rem; color: var(--accent); }
     .battle-status { font-size: 0.55rem; padding: 0.2rem 0.4rem; border-radius: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
     .battle-status.idle { background: var(--surface2); color: var(--text3); }
     .battle-status.running { background: rgba(34, 197, 94, 0.2); color: var(--success); }
     .battle-status.paused { background: rgba(249, 115, 22, 0.2); color: var(--accent); }
     .battle-status.complete { background: var(--surface2); color: var(--text2); }
-    .post-battle-buttons { display: flex; flex-direction: column; gap: 0.3rem; align-items: center; margin-top: 0.5rem; }
-    .export-btn { font-size: 0.65rem; padding: 0.35rem 0.6rem; }
+    .post-battle-actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+    .post-battle-actions .btn { flex: 1; }
     .persist-buttons { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.3rem; }
     .persist-btn { font-size: 0.55rem; padding: 0.25rem 0.4rem; white-space: nowrap; }
     .persist-btn:hover { border-color: var(--accent); color: var(--accent); }
     .empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 0.75rem; }
-    @media (max-width: 1000px) { .setup { grid-template-columns: 1fr; } .arena { flex-direction: column; } .divider { flex-direction: row; width: 100%; height: 40px; } .agent-panel { min-height: 280px; } .controls { justify-content: center; flex-wrap: wrap; } .settings-grid { flex-direction: column; } .endpoint-input input { min-width: 180px; } }
+    @media (max-width: 1000px) { .setup { grid-template-columns: 1fr; } .arena { flex-direction: column; } .divider { flex-direction: row; width: 100%; height: 40px; } .agent-panel { min-height: 280px; height: auto; } .controls { justify-content: center; flex-wrap: wrap; } .settings-grid { flex-direction: column; } .endpoint-input input { min-width: 180px; } }
     footer { padding: 1rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
     footer p { font-size: 0.75rem; color: var(--text3); }
     footer a { color: var(--text2); text-decoration: none; }
@@ -523,10 +524,6 @@
       <div class="divider">
         <div class="turn-display"><div class="current" id="turnCurrent">0</div><div>/ <span id="turnMax">20</span></div></div>
         <div class="battle-status idle" id="battleStatus">Idle</div>
-        <div class="post-battle-buttons" id="postBattleButtons" style="display:none">
-          <button class="btn secondary export-btn" id="exportBtn">Export</button>
-          <button class="btn secondary export-btn" id="publishBtn">Publish</button>
-        </div>
       </div>
       <div class="agent-panel b">
         <div class="agent-header">
@@ -535,6 +532,10 @@
         </div>
         <div class="messages" id="messages2"><div class="empty">Waiting...</div></div>
       </div>
+    </div>
+    <div class="post-battle-actions" id="postBattleButtons" style="display:none">
+      <button class="btn secondary" id="exportBtn">Export</button>
+      <button class="btn secondary" id="publishBtn">Publish</button>
     </div>
   </div>
 
@@ -812,14 +813,10 @@
           $('keepAgent2').style.display = 'none';
           battleHistory = []; 
           break; 
-        case 'turn': 
-          addMessage(d); 
-          battleHistory.push(d); 
-          // Show export button after first turn (mid-battle export)
-          if (battleHistory.length >= 1) {
-            $('postBattleButtons').style.display = 'flex';
-          }
-          break; 
+        case 'turn':
+          addMessage(d);
+          battleHistory.push(d);
+          break;
         case 'complete': 
           battleState = 'complete';
           $('battleStatus').textContent = 'Complete'; 
@@ -843,7 +840,7 @@
           break; 
       } 
     }
-    function addMessage(d) { const c = d.speakerIndex === 0 ? $('messages1') : $('messages2'); if (c.querySelector('.empty')) c.innerHTML = ''; const m = document.createElement('div'); m.className = 'message'; m.innerHTML = esc(d.content) + '<div class="message-meta">Turn ' + (d.turn + 1) + '</div>'; c.appendChild(m); c.scrollTop = c.scrollHeight; $('turnCurrent').textContent = d.turn + 1; }
+    function addMessage(d) { const c = d.speakerIndex === 0 ? $('messages1') : $('messages2'); if (c.querySelector('.empty')) c.innerHTML = ''; const m = document.createElement('div'); m.className = 'message'; const escaped = esc(d.content).replace(/\*([^*\n]+)\*/g, '<span class="action-text">$1</span>'); m.innerHTML = escaped + '<div class="message-meta">Turn ' + (d.turn + 1) + '</div>'; c.appendChild(m); c.scrollTop = c.scrollHeight; $('turnCurrent').textContent = d.turn + 1; }
 
     // Battle
     async function startBattle() {
