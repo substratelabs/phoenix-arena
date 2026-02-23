@@ -528,38 +528,10 @@
     }
 
     /* Footer */
-    footer {
-      padding: 3rem 2rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-    .footer-links a {
-      color: var(--text3);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.2s;
-      position: relative;
-    }
-    .footer-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; left: 0;
-      width: 0; height: 1px;
-      background: var(--accent);
-      transition: width 0.3s ease;
-    }
-    .footer-links a:hover { color: var(--accent); }
-    .footer-links a:hover::after { width: 100%; }
-    .copyright {
-      font-size: 0.75rem;
-      color: var(--text3);
-    }
+    footer { padding: 1rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
+    footer p { font-size: 0.75rem; color: var(--text3); }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
 
     /* Responsive */
     @media (max-width: 900px) {
@@ -762,16 +734,7 @@
     </a>
   </section>
 
-  <footer>
-    <div class="footer-links">
-      <a href="/arena">Arena</a>
-      <a href="/builder">Builder</a>
-      <a href="/archive">Archive</a>
-      <a href="/guide">Guide</a>
-      <a href="https://github.com/substratelabs/phoenix-arena" target="_blank">GitHub</a>
-    </div>
-    <p class="copyright">Built by Substrate Labs · phoenixarena.app</p>
-  </footer>
+  <footer><p><a href="https://github.com/substratelabs/phoenix-arena" target="_blank">Built by Substrate Labs</a></p></footer>
 
   <script>
     const nav = document.getElementById('nav');
