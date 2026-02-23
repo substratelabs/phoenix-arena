@@ -144,7 +144,7 @@ What they will never do. What they must always do.
 
 ## Links
 
-- **Live**: [phoenix-arena.onrender.com](https://phoenix-arena.onrender.com)
+- **Live**: [phoenix-arena.onrender.com](https://phoenixarena.app/)
 - **Substrate**: Coming soon
 - **Whitepaper**: Coming soon
 
