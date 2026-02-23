@@ -11,21 +11,12 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
 const { Arena, setupDatabase } = require('./arena');
-const nodemailer = require('nodemailer');
-
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-  });
-}
+const { Resend } = require('resend');
 
 async function sendMagicLinkEmail(toEmail, magicUrl) {
-  const transporter = createTransporter();
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM,
     to: toEmail,
     subject: 'Sign in to Phoenix Arena',
     text: `Click this link to sign in (expires in 15 minutes):\n\n${magicUrl}`,
@@ -337,7 +328,7 @@ app.get('/auth/google/callback', async (req, res) => {
 
 // Email login — Step 1: Request magic link
 app.post('/auth/email/request', async (req, res) => {
-  if (!process.env.EMAIL_HOST) {
+  if (!process.env.RESEND_API_KEY) {
     return res.status(503).json({ error: 'Email login not configured' });
   }
   const { email } = req.body;
