@@ -195,7 +195,7 @@ class Agent {
     }
     
     if (maxWords) {
-      prompt += `Respond in ${maxWords} words or fewer.\n\n`;
+      prompt += `Respond in ${Math.ceil(maxWords / 10)} sentences or fewer. Complete every sentence.\n\n`;
     }
 
     return prompt || null;
