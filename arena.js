@@ -450,7 +450,8 @@ class Battle {
       type: 'complete',
       battleId: this.id,
       turns: this.turn,
-      duration: this.endTime - this.startTime
+      duration: this.endTime - this.startTime,
+      agentBrains: this.agents.map(a => a.brain || null)
     });
     
     console.log(`\n🏁 Battle complete. ${this.turn} turns.`);

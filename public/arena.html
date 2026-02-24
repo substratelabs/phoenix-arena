@@ -840,8 +840,21 @@
           $('postBattleButtons').style.display = 'flex';
           $('keepAgent1').style.display = 'inline-block';
           $('keepAgent2').style.display = 'inline-block';
+          if (d.agentBrains) {
+            [1, 2].forEach(function(n) {
+              var brain = d.agentBrains[n - 1];
+              if (brain) {
+                agents[n].brain = brain;
+                $('exportBrain' + n).style.display = 'inline-block';
+                var badgesEl = $('badges' + n);
+                if (!badgesEl.innerHTML.includes('Brain')) {
+                  badgesEl.innerHTML += '<span class="badge brain">Brain</span>';
+                }
+              }
+            });
+          }
           document.querySelectorAll('.agent-panel').forEach(function(p) { p.classList.remove('active', 'dimmed'); });
-          break; 
+          break;
         case 'paused': 
           battleState = 'paused';
           $('battleStatus').textContent = 'Paused'; 
