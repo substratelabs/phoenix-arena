@@ -235,7 +235,16 @@ class Agent {
 function truncateToWords(text, maxWords) {
   const words = text.trim().split(/\s+/);
   if (words.length <= maxWords) return text;
-  return words.slice(0, maxWords).join(' ');
+  const candidate = words.slice(0, maxWords).join(' ');
+  const lastSentenceEnd = Math.max(
+    candidate.lastIndexOf('.'),
+    candidate.lastIndexOf('!'),
+    candidate.lastIndexOf('?')
+  );
+  if (lastSentenceEnd !== -1) {
+    return candidate.slice(0, lastSentenceEnd + 1);
+  }
+  return candidate;
 }
 
 // ============================================================================
