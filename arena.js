@@ -229,6 +229,16 @@ class Agent {
 }
 
 // ============================================================================
+// HELPERS
+// ============================================================================
+
+function truncateToWords(text, maxWords) {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(' ');
+}
+
+// ============================================================================
 // BATTLE
 // ============================================================================
 
@@ -344,7 +354,15 @@ class Battle {
 
     try {
       const messages = this.buildMessages(this.currentSpeaker, input);
-      const response = await agent.respond(messages);
+      let response = await agent.respond(messages);
+
+      if (this.maxWords) {
+        const wordCount = response.trim().split(/\s+/).length;
+        if (wordCount > this.maxWords) {
+          response = truncateToWords(response, this.maxWords);
+          console.log(`✂️ Truncated ${agent.name}: ${wordCount} → ${this.maxWords} words`);
+        }
+      }
       
       const turnData = {
         turn: this.turn,
