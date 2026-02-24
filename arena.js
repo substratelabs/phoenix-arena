@@ -311,7 +311,7 @@ class Battle {
 
     // Build opening - Agent 0 starts
     const agent0 = this.agents[0];
-    const basePrompt = agent0.prompt || this.prompt || 'Begin.';
+    const basePrompt = this.prompt || 'Begin.';
     
     // DEBUG
     console.log(`Opening prompt for Agent 0: ${basePrompt.slice(0, 100)}...`);
