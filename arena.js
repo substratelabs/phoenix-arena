@@ -495,7 +495,7 @@ class Battle {
     
     // Save memories to agent brains
     for (const agent of this.agents) {
-      agent.addMemory('arena_battle', {
+      agent.addMemory(`arena_battle_${this.id}`, {
         battleId: this.id,
         prompt: this.prompt,
         turns: this.turn,
