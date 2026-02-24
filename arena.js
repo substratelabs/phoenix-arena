@@ -21,10 +21,10 @@ class AnthropicProvider {
     this.maxTokens = config.maxTokens || 1000;
   }
 
-  async chat(messages, systemPrompt) {
+  async chat(messages, systemPrompt, maxWords) {
     const response = await this.client.messages.create({
       model: this.model,
-      max_tokens: this.maxTokens,
+      max_tokens: maxWords ? Math.ceil(maxWords * 1.5) : this.maxTokens,
       system: systemPrompt || 'You are an AI.',
       messages: messages
     });
@@ -38,7 +38,7 @@ class OllamaProvider {
     this.model = config.model || 'llama3';
   }
 
-  async chat(messages, systemPrompt) {
+  async chat(messages, systemPrompt, maxWords) {
     // Use the chat API instead of generate
     const ollamaMessages = [];
     
@@ -196,9 +196,9 @@ class Agent {
     return prompt || null;
   }
 
-  async respond(messages) {
+  async respond(messages, maxWords) {
     const systemPrompt = this.buildSystemPrompt();
-    
+
     // DEBUG LOGGING
     console.log(`\n========== AGENT DEBUG: ${this.name} ==========`);
     console.log(`Anonymous: ${this.anonymous}`);
@@ -209,8 +209,8 @@ class Agent {
       console.log(`First message: ${messages[0].content?.slice(0, 150)}...`);
     }
     console.log(`==============================================\n`);
-    
-    return await this.provider.chat(messages, systemPrompt);
+
+    return await this.provider.chat(messages, systemPrompt, maxWords);
   }
 
   addMemory(key, value) {
@@ -226,25 +226,6 @@ class Agent {
       timestamp: Date.now()
     });
   }
-}
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function truncateToWords(text, maxWords) {
-  const words = text.trim().split(/\s+/);
-  if (words.length <= maxWords) return text;
-  const candidate = words.slice(0, maxWords).join(' ');
-  const lastSentenceEnd = Math.max(
-    candidate.lastIndexOf('.'),
-    candidate.lastIndexOf('!'),
-    candidate.lastIndexOf('?')
-  );
-  if (lastSentenceEnd !== -1) {
-    return candidate.slice(0, lastSentenceEnd + 1);
-  }
-  return candidate;
 }
 
 // ============================================================================
@@ -363,16 +344,8 @@ class Battle {
 
     try {
       const messages = this.buildMessages(this.currentSpeaker, input);
-      let response = await agent.respond(messages);
+      const response = await agent.respond(messages, this.maxWords);
 
-      if (this.maxWords) {
-        const wordCount = response.trim().split(/\s+/).length;
-        if (wordCount > this.maxWords) {
-          response = truncateToWords(response, this.maxWords);
-          console.log(`✂️ Truncated ${agent.name}: ${wordCount} → ${this.maxWords} words`);
-        }
-      }
-      
       const turnData = {
         turn: this.turn,
         speakerIndex: this.currentSpeaker,
@@ -431,12 +404,7 @@ class Battle {
     }
 
     // Build the last message content
-    let lastMessageContent = lastMessage || '';
-
-    // Add word limit constraint EVERY turn if set (this is fine to show)
-    if (this.maxWords && lastMessage) {
-      lastMessageContent = `[${this.maxWords} words max]\n\n${lastMessage}`;
-    }
+    const lastMessageContent = lastMessage || '';
 
     if (lastMessageContent) {
       // Check for duplicate: is lastMessage already the last history entry?
