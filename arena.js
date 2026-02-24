@@ -22,9 +22,11 @@ class AnthropicProvider {
   }
 
   async chat(messages, systemPrompt, maxWords) {
+    const maxTokensValue = maxWords ? Math.ceil(maxWords * 1.5) : this.maxTokens;
+    console.log(`[AnthropicProvider] max_tokens: ${maxTokensValue}`);
     const response = await this.client.messages.create({
       model: this.model,
-      max_tokens: maxWords ? Math.ceil(maxWords * 1.5) : this.maxTokens,
+      max_tokens: maxTokensValue,
       system: systemPrompt || 'You are an AI.',
       messages: messages
     });
