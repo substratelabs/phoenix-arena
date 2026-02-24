@@ -22,11 +22,10 @@ class AnthropicProvider {
   }
 
   async chat(messages, systemPrompt, maxWords) {
-    const maxTokensValue = maxWords ? Math.ceil(maxWords * 1.5) : this.maxTokens;
-    console.log(`[AnthropicProvider] max_tokens: ${maxTokensValue}`);
+    console.log(`[AnthropicProvider] max_tokens: 1024`);
     const response = await this.client.messages.create({
       model: this.model,
-      max_tokens: maxTokensValue,
+      max_tokens: 1024,
       system: systemPrompt || 'You are an AI.',
       messages: messages
     });
@@ -133,7 +132,7 @@ class Agent {
     }
   }
 
-  buildSystemPrompt() {
+  buildSystemPrompt(maxWords) {
     let prompt = '';
     
     // Anonymous mode: blank slate, no identity
@@ -195,11 +194,15 @@ class Agent {
       }
     }
     
+    if (maxWords) {
+      prompt += `Respond in ${maxWords} words or fewer.\n\n`;
+    }
+
     return prompt || null;
   }
 
   async respond(messages, maxWords) {
-    const systemPrompt = this.buildSystemPrompt();
+    const systemPrompt = this.buildSystemPrompt(maxWords);
 
     // DEBUG LOGGING
     console.log(`\n========== AGENT DEBUG: ${this.name} ==========`);
