@@ -415,8 +415,10 @@ class Battle {
       // Check for duplicate: is lastMessage already the last history entry?
       const lastHistoryEntry = this.history[this.history.length - 1];
       const isDuplicate = lastHistoryEntry && lastHistoryEntry.content === lastMessage;
-      console.log(`  [appending lastMessage as 'user'] isDuplicateOfLastHistory=${isDuplicate} content="${lastMessageContent.slice(0, 80)}..."`);
-      messages.push({ role: 'user', content: lastMessageContent });
+      console.log(`  [lastMessage isDuplicateOfLastHistory=${isDuplicate}] content="${lastMessageContent.slice(0, 80)}..."`);
+      if (!isDuplicate) {
+        messages.push({ role: 'user', content: lastMessageContent });
+      }
     }
 
     console.log(`\n--- FULL MESSAGES ARRAY (${messages.length} entries) ---`);
