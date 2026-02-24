@@ -338,7 +338,10 @@ class Battle {
     }
 
     const agent = this.agents[this.currentSpeaker];
-    
+
+    console.log(`\n---------- runTurn() turn=${this.turn} speaker=${agent.name} (index ${this.currentSpeaker}) ----------`);
+    console.log(`  input (first 200 chars): "${(input || '').slice(0, 200).replace(/\n/g, '\\n')}"`);
+
     try {
       const messages = this.buildMessages(this.currentSpeaker, input);
       const response = await agent.respond(messages);
@@ -388,25 +391,53 @@ class Battle {
   buildMessages(speakerIndex, lastMessage) {
     const messages = [];
     const agent = this.agents[speakerIndex];
-    
+
+    console.log(`\n========== buildMessages() for ${agent.name} (index ${speakerIndex}) ==========`);
+    console.log(`History entries: ${this.history.length}`);
+    console.log(`Input lastMessage (first 200 chars): ${(lastMessage || '').slice(0, 200)}`);
+
     // History of conversation
     for (const entry of this.history) {
       const role = entry.speakerIndex === speakerIndex ? 'assistant' : 'user';
+      console.log(`  [history turn ${entry.turn}] speakerIndex=${entry.speakerIndex} → role='${role}' content="${entry.content.slice(0, 80)}..."`);
       messages.push({ role, content: entry.content });
     }
-    
+
     // Build the last message content
     let lastMessageContent = lastMessage || '';
-    
+
     // Add word limit constraint EVERY turn if set (this is fine to show)
     if (this.maxWords && lastMessage) {
       lastMessageContent = `[${this.maxWords} words max]\n\n${lastMessage}`;
     }
-    
+
     if (lastMessageContent) {
+      // Check for duplicate: is lastMessage already the last history entry?
+      const lastHistoryEntry = this.history[this.history.length - 1];
+      const isDuplicate = lastHistoryEntry && lastHistoryEntry.content === lastMessage;
+      console.log(`  [appending lastMessage as 'user'] isDuplicateOfLastHistory=${isDuplicate} content="${lastMessageContent.slice(0, 80)}..."`);
       messages.push({ role: 'user', content: lastMessageContent });
     }
-    
+
+    console.log(`\n--- FULL MESSAGES ARRAY (${messages.length} entries) ---`);
+    messages.forEach((m, i) => {
+      console.log(`  [${i}] role='${m.role}' content="${m.content.slice(0, 120).replace(/\n/g, '\\n')}"`);
+    });
+    console.log(`--- END MESSAGES ARRAY ---`);
+
+    // Check if any other agent's directive text appears in these messages
+    this.agents.forEach((a, i) => {
+      if (i !== speakerIndex && a.prompt) {
+        const directiveSnippet = a.prompt.slice(0, 40);
+        const leakFound = messages.some(m => m.content.includes(directiveSnippet));
+        if (leakFound) {
+          console.log(`  *** LEAK DETECTED: Agent ${i} (${a.name}) directive found in messages for Agent ${speakerIndex} (${agent.name}) ***`);
+          console.log(`      Directive snippet: "${directiveSnippet}"`);
+        }
+      }
+    });
+    console.log(`=======================================================\n`);
+
     return messages;
   }
 
