@@ -132,7 +132,7 @@ class Agent {
     }
   }
 
-  buildSystemPrompt() {
+  buildSystemPrompt(maxWords) {
     let prompt = '';
     
     // Anonymous mode: blank slate, no identity
@@ -194,11 +194,15 @@ class Agent {
       }
     }
     
+    if (maxWords) {
+      prompt += `Respond in ${maxWords} words or fewer.\n\n`;
+    }
+
     return prompt || null;
   }
 
   async respond(messages, maxWords) {
-    const systemPrompt = this.buildSystemPrompt();
+    const systemPrompt = this.buildSystemPrompt(maxWords);
 
     // DEBUG LOGGING
     console.log(`\n========== AGENT DEBUG: ${this.name} ==========`);
