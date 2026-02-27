@@ -146,6 +146,10 @@
     .battle-item .battle-title { font-size: 0.82rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     .battle-item .battle-likes { font-size: 0.7rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem; }
 
+    .load-more-btn { display: block; margin: 1.5rem auto 0; padding: 0.6rem 1.75rem; background: var(--surface); border: 1px solid var(--accent); border-radius: 0.375rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: background 0.2s, color 0.2s; }
+    .load-more-btn:hover { background: var(--accent); color: var(--bg); }
+    .load-more-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); margin-top: 2rem; }
     footer p { font-size: 0.75rem; color: var(--text3); }
     footer a { color: var(--text2); text-decoration: none; }
@@ -285,6 +289,7 @@
     </div>
 
     <div class="archive-list" id="archiveList"><div class="empty-state">Loading...</div></div>
+    <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()" style="display:none">Load More</button>
 
     <footer><p><a href="https://github.com/substratelabs/phoenix-arena" target="_blank">Built by Substrate Labs</a></p></footer>
   </div>
@@ -296,6 +301,8 @@
     let currentSort = 'newest';
     let currentQuery = '';
     let currentModel = 'all';
+    let currentPage = 1;
+    let totalBattles = 0;
     
     async function checkAuth() {
       if (!token) return;
@@ -377,29 +384,65 @@
       }
     });
     
+    function parsePreview(entries) {
+      entries.forEach(entry => {
+        try {
+          const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
+          if (transcript && transcript.length > 0) {
+            entry.previewText = transcript.slice(0, 2).map(t => t.content || '').join(' ').substring(0, 200);
+          }
+        } catch (e) { entry.previewText = ''; }
+      });
+    }
+
+    function updateLoadMoreBtn() {
+      const btn = document.getElementById('loadMoreBtn');
+      btn.style.display = allEntries.length >= totalBattles ? 'none' : 'block';
+      btn.disabled = false;
+    }
+
     async function loadArchive() {
       const list = document.getElementById('archiveList');
+      currentPage = 1;
       try {
-        const res = await fetch('/api/archive/published');
-        allEntries = await res.json();
-        allEntries.forEach(entry => {
-          try {
-            const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
-            if (transcript && transcript.length > 0) {
-              entry.previewText = transcript.slice(0, 2).map(t => t.content || '').join(' ').substring(0, 200);
-            }
-          } catch (e) { entry.previewText = ''; }
-        });
+        const res = await fetch('/api/archive/published?page=1&limit=20');
+        const data = await res.json();
+        const battles = data.battles || data;
+        totalBattles = data.total !== undefined ? data.total : battles.length;
+        allEntries = battles;
+        parsePreview(allEntries);
         if (!allEntries.length) {
-          list.innerHTML = '<div class="empty-state"><h3>No published battles yet</h3><p>Run a battle in the arena and publish it.</p><a href="/arena">Enter Arena →</a></div>';
+          list.innerHTML = '<div class="empty-state"><h3>No published battles yet</h3><p>Run a battle in the arena and publish it.</p><a href="/arena">Enter Arena \u2192</a></div>';
           return;
         }
-        updateStats(allEntries);
+        updateStats();
         renderEntries(allEntries);
+        updateLoadMoreBtn();
         loadTopBattles();
       } catch (e) {
         list.innerHTML = '<div class="empty-state"><p>Error loading archive</p></div>';
       }
+    }
+
+    async function loadMore() {
+      const btn = document.getElementById('loadMoreBtn');
+      btn.disabled = true;
+      btn.textContent = 'Loading\u2026';
+      currentPage += 1;
+      try {
+        const res = await fetch('/api/archive/published?page=' + currentPage + '&limit=20');
+        const data = await res.json();
+        const battles = data.battles || data;
+        if (data.total !== undefined) totalBattles = data.total;
+        parsePreview(battles);
+        allEntries = allEntries.concat(battles);
+        appendEntries(battles);
+        updateLoadMoreBtn();
+      } catch (e) {
+        currentPage -= 1;
+        btn.disabled = false;
+      }
+      btn.textContent = 'Load More';
     }
 
     async function loadTopCreators() {
@@ -441,13 +484,49 @@
       renderEntries(filtered, currentQuery);
     }
 
-    function updateStats(entries) {
-      document.getElementById('statBattles').textContent = entries.length;
-      const creators = new Set(entries.map(e => e.username).filter(Boolean));
+    function updateStats() {
+      document.getElementById('statBattles').textContent = totalBattles || allEntries.length;
+      const creators = new Set(allEntries.map(e => e.username).filter(Boolean));
       document.getElementById('statCreators').textContent = creators.size;
-      const turns = entries.reduce((sum, e) => sum + (e.turns || 0), 0);
+      const turns = allEntries.reduce((sum, e) => sum + (e.turns || 0), 0);
       document.getElementById('statTurns').textContent = turns;
       document.getElementById('statsBar').style.display = 'flex';
+    }
+
+    function appendEntries(entries) {
+      const list = document.getElementById('archiveList');
+      if (!entries.length) return;
+      const fragment = document.createDocumentFragment();
+      entries.forEach(entry => {
+        let models = '';
+        try {
+          const transcript = typeof entry.transcript === 'string' ? JSON.parse(entry.transcript) : entry.transcript;
+          if (transcript && transcript[0]?.model) {
+            const modelSet = new Set(transcript.map(t => t.model).filter(Boolean));
+            const modelLabel = [...modelSet].map(m => m.includes('opus') ? 'Opus' : m.includes('sonnet') ? 'Sonnet' : m.includes('haiku') ? 'Haiku' : m.split('-')[1] || m).join(' vs ');
+            models = modelLabel ? `<span class="models">${modelLabel}</span>` : '';
+          }
+        } catch (e) {}
+        const el = document.createElement('div');
+        el.className = 'archive-entry';
+        el.onclick = () => { window.location = '/battle/' + entry.id; };
+        const authorHtml = entry.username ? `<a href="/profile/${entry.username}" class="author-link" onclick="event.stopPropagation()">@${entry.username}</a>` : '';
+        const previewHtml = entry.previewText ? `<div class="preview">${escapeHtml(entry.previewText)}...</div>` : '';
+        el.innerHTML = `
+          <h3>${escapeHtml(entry.title || entry.agent1 + ' vs ' + entry.agent2)}</h3>
+          <div class="meta">
+            <span>${entry.turns} turns</span>
+            ${models}
+            <span>${formatDate(entry.created_at)}</span>
+            <span class="stats-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${entry.like_count || 0}</span>
+            <span class="stats-inline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${entry.comment_count || 0}</span>
+            ${authorHtml}
+          </div>
+          ${previewHtml}
+        `;
+        fragment.appendChild(el);
+      });
+      list.appendChild(fragment);
     }
 
     function loadTopBattles() {
