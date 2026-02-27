@@ -827,6 +827,7 @@
           $('keepAgent1').style.display = 'none';
           $('keepAgent2').style.display = 'none';
           battleHistory = [];
+          battlePersisted = { 1: false, 2: false };
           document.querySelectorAll('.agent-panel').forEach(function(p) { p.classList.remove('active', 'dimmed'); });
           break; 
         case 'turn':
@@ -849,6 +850,7 @@
               }
             });
           }
+          [1, 2].forEach(function(n) { if (agentPersisted[n]) persistAgent(n); });
           document.querySelectorAll('.agent-panel').forEach(function(p) { p.classList.remove('active', 'dimmed'); });
           break;
         case 'paused': 
@@ -981,40 +983,38 @@
     }
     
     let agentPersisted = { 1: false, 2: false };
+    let battlePersisted = { 1: false, 2: false };
     let pendingBrains = {};
     
     function persistAgent(agentNum) {
-      // Toggle persist state
-      agentPersisted[agentNum] = !agentPersisted[agentNum];
-      $(`keepAgent${agentNum}`).classList.toggle('active', agentPersisted[agentNum]);
-      
-      // If turning OFF, restore the brain to its pre-battle snapshot
-      if (!agentPersisted[agentNum]) {
-        agents[agentNum].brain = brainSnapshots[agentNum];
-        $(`badges${agentNum}`).querySelectorAll('.badge.brain').forEach(el => el.remove());
-        return;
-      }
-      
+      // Guard: prevent double-counting in the same battle completion cycle
+      if (battlePersisted[agentNum]) return;
+      battlePersisted[agentNum] = true;
+
+      // Mark Keep as ON and activate button
+      agentPersisted[agentNum] = true;
+      $(`keepAgent${agentNum}`).classList.add('active');
+
       // Build memory from this battle (from agent's POV)
       const otherNum = agentNum === 1 ? 2 : 1;
       const myTurns = battleHistory.filter(t => t.speakerIndex === agentNum - 1);
       const otherTurns = battleHistory.filter(t => t.speakerIndex === otherNum - 1);
-      
+
       const newMemories = [
         { key: 'last_opponent', value: agents[otherNum].name, timestamp: Date.now() },
         { key: 'last_battle_turns', value: battleHistory.length, timestamp: Date.now() },
-        ...myTurns.slice(-5).map((t, i) => ({ 
-          key: `my_statement_${i}`, 
-          value: t.content.slice(0, 300), 
-          timestamp: Date.now() 
+        ...myTurns.slice(-5).map((t, i) => ({
+          key: `my_statement_${i}`,
+          value: t.content.slice(0, 300),
+          timestamp: Date.now()
         })),
-        ...otherTurns.slice(-3).map((t, i) => ({ 
-          key: `opponent_said_${i}`, 
-          value: t.content.slice(0, 200), 
-          timestamp: Date.now() 
+        ...otherTurns.slice(-3).map((t, i) => ({
+          key: `opponent_said_${i}`,
+          value: t.content.slice(0, 200),
+          timestamp: Date.now()
         }))
       ];
-      
+
       // Merge with existing brain or create new one
       if (!agents[agentNum].brain) {
         agents[agentNum].brain = { conversationMemories: [], stats: { totalConversations: 0, totalTurns: 0 } };
@@ -1025,13 +1025,13 @@
       ].slice(-50); // Keep last 50 memories
       agents[agentNum].brain.stats.totalConversations = (agents[agentNum].brain.stats.totalConversations || 0) + 1;
       agents[agentNum].brain.stats.totalTurns = (agents[agentNum].brain.stats.totalTurns || 0) + battleHistory.length;
-      
+
       // Update UI to show brain badge
       const badgesEl = $(`badges${agentNum}`);
       if (!badgesEl.innerHTML.includes('Brain')) {
         badgesEl.innerHTML += '<span class="badge brain">Brain</span>';
       }
-      
+
       // Show export brain button
       $(`exportBrain${agentNum}`).style.display = 'inline-block';
 
@@ -1040,9 +1040,31 @@
       $(`clearBrain${agentNum}`).style.display = 'block';
       $(`brainPreview${agentNum}`).textContent = getBrainStats(agents[agentNum].brain);
     }
-    
-    function keepAgent1() { persistAgent(1); }
-    function keepAgent2() { persistAgent(2); }
+
+    function keepAgent1() {
+      if (agentPersisted[1]) {
+        // Toggle OFF: restore brain to pre-battle snapshot
+        agentPersisted[1] = false;
+        battlePersisted[1] = false;
+        $('keepAgent1').classList.remove('active');
+        agents[1].brain = brainSnapshots[1];
+        $('badges1').querySelectorAll('.badge.brain').forEach(el => el.remove());
+      } else {
+        persistAgent(1);
+      }
+    }
+    function keepAgent2() {
+      if (agentPersisted[2]) {
+        // Toggle OFF: restore brain to pre-battle snapshot
+        agentPersisted[2] = false;
+        battlePersisted[2] = false;
+        $('keepAgent2').classList.remove('active');
+        agents[2].brain = brainSnapshots[2];
+        $('badges2').querySelectorAll('.badge.brain').forEach(el => el.remove());
+      } else {
+        persistAgent(2);
+      }
+    }
     
     function exportBrain(agentNum) {
       const agent = agents[agentNum];
@@ -1074,7 +1096,8 @@
       
       // Reset persist state
       agentPersisted = { 1: false, 2: false };
-      
+      battlePersisted = { 1: false, 2: false };
+
       // Reset UI fields
       $('name1').value = 'Agent 1';
       $('name2').value = 'Agent 2';
@@ -1118,6 +1141,7 @@
       agents[1] = { name: 'Agent 1', model: null, provider: 'anthropic', soul: null, brain: null };
       agents[2] = { name: 'Agent 2', model: null, provider: 'anthropic', soul: null, brain: null };
       agentPersisted = { 1: false, 2: false };
+      battlePersisted = { 1: false, 2: false };
       
       // Reset messages
       $('messages1').innerHTML = '<div class="empty">Waiting...<span class="blink-cursor">_</span></div>';
