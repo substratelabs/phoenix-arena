@@ -558,6 +558,7 @@
     let ws, battle = null, battleHistory = [];
     let config = { providers: { anthropic: { enabled: true }, ollama: { enabled: false, endpoint: '' } } };
     let agents = { 1: { name: 'Agent 1', soul: null, soulName: null, brain: null, brainName: null }, 2: { name: 'Agent 2', soul: null, soulName: null, brain: null, brainName: null } };
+    let brainSnapshots = { 1: null, 2: null };
     let presets = {};
     let advancedMode = false;
     let promptMode = 'single'; // 'single', 'split', 'shared-split'
@@ -885,6 +886,8 @@
 
     // Battle
     async function startBattle() {
+      brainSnapshots[1] = agents[1].brain ? JSON.parse(JSON.stringify(agents[1].brain)) : null;
+      brainSnapshots[2] = agents[2].brain ? JSON.parse(JSON.stringify(agents[2].brain)) : null;
       const m1 = $('model1'), m2 = $('model2');
       agents[1].name = $('name1').value || 'Agent 1'; agents[1].model = m1.value; agents[1].provider = m1.options[m1.selectedIndex]?.dataset.provider || 'anthropic';
       agents[2].name = $('name2').value || 'Agent 2'; agents[2].model = m2.value; agents[2].provider = m2.options[m2.selectedIndex]?.dataset.provider || 'anthropic';
@@ -985,10 +988,10 @@
       agentPersisted[agentNum] = !agentPersisted[agentNum];
       $(`keepAgent${agentNum}`).classList.toggle('active', agentPersisted[agentNum]);
       
-      // If turning OFF, clear the brain we added
+      // If turning OFF, restore the brain to its pre-battle snapshot
       if (!agentPersisted[agentNum]) {
-        // Don't clear original brain if it was uploaded, just the battle memories
-        // For now, just toggle the visual state
+        agents[agentNum].brain = brainSnapshots[agentNum];
+        $(`badges${agentNum}`).querySelectorAll('.badge.brain').forEach(el => el.remove());
         return;
       }
       
@@ -1031,6 +1034,11 @@
       
       // Show export brain button
       $(`exportBrain${agentNum}`).style.display = 'inline-block';
+
+      // Update brain preview box to reflect new state
+      $(`brainBox${agentNum}`).classList.add('loaded');
+      $(`clearBrain${agentNum}`).style.display = 'block';
+      $(`brainPreview${agentNum}`).textContent = getBrainStats(agents[agentNum].brain);
     }
     
     function keepAgent1() { persistAgent(1); }
