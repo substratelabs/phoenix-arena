@@ -177,9 +177,9 @@ class Agent {
 
       // If brain has conversation memories
       if (this.brain.conversationMemories?.length > 0) {
-        prompt += '## Recent Memories\n';
+        prompt += '## Your Personal Memory Log — these are experiences YOU lived through in previous conversations:\n';
         this.brain.conversationMemories.slice(-10).forEach(mem => {
-          prompt += `- ${mem.key}: ${mem.value}\n`;
+          prompt += `- ${mem.value}\n`;
         });
       }
 
