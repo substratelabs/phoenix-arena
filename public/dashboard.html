@@ -366,7 +366,7 @@
           <div class="setting-row">
             <div class="setting-label">
               Anthropic API Key
-              <span>Your key is stored securely and used for battles</span>
+              <span>Your key is stored locally in your browser only and never sent to our servers.</span>
             </div>
             <div class="setting-input">
               <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
@@ -480,8 +480,9 @@
         document.getElementById('statFollowing').textContent = currentUser.following_count || 0;
         
         // Load API key if exists
-        if (currentUser.api_key) {
-          document.getElementById('apiKeyInput').value = currentUser.api_key;
+        const savedApiKey = localStorage.getItem('phoenix_anthropic_key');
+        if (savedApiKey) {
+          document.getElementById('apiKeyInput').value = savedApiKey;
         }
         
         // Load battles
@@ -589,27 +590,14 @@
       }
     }
 
-    async function saveApiKey() {
+    function saveApiKey() {
       const apiKey = document.getElementById('apiKeyInput').value.trim();
-      try {
-        const res = await fetch('/api/profile/apikey', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-          body: JSON.stringify({ apiKey }) 
-        });
-        if (res.ok) { 
-          showToast('API key saved!');
-          if (apiKey) {
-            localStorage.setItem('anthropic_api_key', apiKey);
-          } else {
-            localStorage.removeItem('anthropic_api_key');
-          }
-        } else { 
-          showToast('Failed to save API key', true); 
-        }
-      } catch (e) { 
-        showToast('Error saving API key', true); 
+      if (apiKey) {
+        localStorage.setItem('phoenix_anthropic_key', apiKey);
+      } else {
+        localStorage.removeItem('phoenix_anthropic_key');
       }
+      showToast('API key saved!');
     }
 
     document.getElementById('avatarInput').addEventListener('change', async (e) => {
@@ -835,9 +823,11 @@
       return new Date(timestamp * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => { 
-      localStorage.removeItem('phoenix_token'); 
-      window.location.href = '/'; 
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('phoenix_token');
+      localStorage.removeItem('phoenix_anthropic_key');
+      document.getElementById('apiKeyInput').value = '';
+      window.location.href = '/';
     });
 
     function showToast(msg, isError = false) { 
