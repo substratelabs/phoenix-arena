@@ -633,12 +633,17 @@
 
     function logout() {
       localStorage.removeItem('phoenix_token');
+      localStorage.removeItem('phoenix_anthropic_key');
       authToken = null;
       currentUser = null;
       updateAuthUI(null);
       presets = {};;
       loadLocalPresets();
       updatePresetsList();
+      $('anthropicApiKey').value = '';
+      $('clearApiKey').style.display = 'none';
+      $('saveApiKey').style.display = 'inline-block';
+      $('apiKeyStatus').textContent = '';
     }
 
     // Presets - local fallback
