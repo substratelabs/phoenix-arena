@@ -418,7 +418,6 @@ app.get('/auth/me', (req, res) => {
           name: freshUser.name,
           avatar_url: freshUser.avatar_url,
           bio: freshUser.bio,
-          api_key: freshUser.api_key,
           followers_count,
           following_count
         }
@@ -600,6 +599,17 @@ function setupUserTable() {
       )
     `);
     
+    // Drop api_key column if it exists (API keys must never be stored server-side)
+    try {
+      const cols = db.prepare("PRAGMA table_info(users)").all();
+      if (cols.some(c => c.name === 'api_key')) {
+        db.prepare("ALTER TABLE users DROP COLUMN api_key").run();
+        console.log('Migrated users table: dropped api_key column');
+      }
+    } catch (e) {
+      console.error('Migration error (drop api_key):', e.message);
+    }
+
     db.prepare(`CREATE TABLE IF NOT EXISTS email_tokens (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       email      TEXT NOT NULL,
@@ -1037,23 +1047,6 @@ app.post('/api/profile/avatar', requireAuth, express.json({ limit: '5mb' }), (re
     db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(avatarUrl, req.user.id);
     
     res.json({ success: true, avatar_url: avatarUrl });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// Save API key to profile
-app.post('/api/profile/apikey', requireAuth, (req, res) => {
-  const { apiKey } = req.body;
-  
-  try {
-    // Add api_key column if not exists
-    try {
-      db.exec('ALTER TABLE users ADD COLUMN api_key TEXT');
-    } catch (e) {} // Column might already exist
-    
-    db.prepare('UPDATE users SET api_key = ? WHERE id = ?').run(apiKey || null, req.user.id);
-    res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
