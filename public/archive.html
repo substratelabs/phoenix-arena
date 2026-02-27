@@ -135,11 +135,6 @@
     .stats-bar { display: flex; gap: 0.5rem; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text3); margin-top: 0.5rem; }
     .stats-bar .stat-num { color: var(--text2); }
 
-    .model-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .model-tag { padding: 0.3rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
-    .model-tag:hover { border-color: var(--text3); color: var(--text); }
-    .model-tag.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-
     .battle-item { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
     .battle-item:last-child { border-bottom: none; }
     .battle-item:hover { transform: translateX(4px); }
@@ -269,22 +264,17 @@
       <input type="text" id="searchInput" placeholder="Search battles, users, or content...">
     </div>
 
-    <div class="model-filters">
-      <button class="model-tag active" data-model="all">All</button>
-      <button class="model-tag" data-model="opus">Opus</button>
-      <button class="model-tag" data-model="sonnet">Sonnet</button>
-      <button class="model-tag" data-model="haiku">Haiku</button>
-    </div>
-
     <div class="sort-dropdown" id="sortDropdown">
       <button class="sort-btn" id="sortBtn" onclick="toggleSortDropdown()">
-        <span id="sortLabel">Newest</span>
+        <span id="sortLabel">Hot</span>
         <svg class="sort-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="sort-menu" id="sortMenu">
-        <button class="sort-option active" data-sort="newest">Newest</button>
+        <button class="sort-option" data-sort="newest">Newest</button>
         <button class="sort-option" data-sort="oldest">Oldest</button>
-        <button class="sort-option" data-sort="popular">Popular</button>
+        <button class="sort-option" data-sort="liked">Most Liked</button>
+        <button class="sort-option" data-sort="turns">Most Turns</button>
+        <button class="sort-option active" data-sort="hot">Hot</button>
       </div>
     </div>
 
@@ -298,9 +288,8 @@
     const token = localStorage.getItem('phoenix_token');
     let currentUser = null;
     let allEntries = [];
-    let currentSort = 'newest';
+    let currentSort = 'hot';
     let currentQuery = '';
-    let currentModel = 'all';
     let currentPage = 1;
     let totalBattles = 0;
     
@@ -465,12 +454,6 @@
     
     function applyFilters() {
       let filtered = allEntries;
-      if (currentModel !== 'all') {
-        filtered = filtered.filter(entry =>
-          (entry.agent1 || '').toLowerCase().includes(currentModel) ||
-          (entry.agent2 || '').toLowerCase().includes(currentModel)
-        );
-      }
       if (currentQuery) {
         filtered = filtered.filter(entry => {
           const title = (entry.title || '').toLowerCase();
@@ -562,7 +545,18 @@
       let sorted = [...entries];
       if (currentSort === 'newest') sorted.sort((a, b) => b.created_at - a.created_at);
       else if (currentSort === 'oldest') sorted.sort((a, b) => a.created_at - b.created_at);
-      else if (currentSort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+      else if (currentSort === 'liked') sorted.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+      else if (currentSort === 'turns') sorted.sort((a, b) => (b.turn_count || b.turns || 0) - (a.turn_count || a.turns || 0));
+      else if (currentSort === 'hot') {
+        const now = Date.now() / 1000;
+        sorted.sort((a, b) => {
+          const hoursA = (now - a.created_at) / 3600;
+          const hoursB = (now - b.created_at) / 3600;
+          const scoreA = ((a.like_count || 0) * 10 + (a.comment_count || 0) * 5 + (a.views || 0) * 0.5) / Math.pow(hoursA + 2, 1.5);
+          const scoreB = ((b.like_count || 0) * 10 + (b.comment_count || 0) * 5 + (b.views || 0) * 0.5) / Math.pow(hoursB + 2, 1.5);
+          return scoreB - scoreA;
+        });
+      }
       
       if (sorted.length === 0) { list.innerHTML = '<div class="empty-state"><p>No results found</p></div>'; return; }
       
@@ -633,15 +627,6 @@
       };
     });
     
-    document.querySelectorAll('.model-tag').forEach(tag => {
-      tag.addEventListener('click', () => {
-        document.querySelectorAll('.model-tag').forEach(t => t.classList.remove('active'));
-        tag.classList.add('active');
-        currentModel = tag.dataset.model;
-        applyFilters();
-      });
-    });
-
     function formatDate(ts) { return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
     function formatTimeAgo(ts) {
       const s = Math.floor(Date.now() / 1000 - ts);
