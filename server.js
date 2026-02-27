@@ -925,8 +925,12 @@ app.get('/api/archive/published', (req, res) => {
   if (!db) {
     return res.json([]);
   }
-  
+
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const offset = (page - 1) * limit;
+
     const battles = db.prepare(`
       SELECT pb.*, u.username,
         (SELECT COUNT(*) FROM likes WHERE battle_id = pb.id) as like_count,
@@ -934,9 +938,14 @@ app.get('/api/archive/published', (req, res) => {
       FROM published_battles pb
       LEFT JOIN users u ON pb.user_id = u.id
       ORDER BY pb.created_at DESC
-      LIMIT 50
-    `).all();
-    res.json(battles);
+      LIMIT ? OFFSET ?
+    `).all(limit, offset);
+
+    const { total } = db.prepare(`
+      SELECT COUNT(*) as total FROM published_battles
+    `).get();
+
+    res.json({ battles, total, page, limit });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
