@@ -148,24 +148,19 @@ class Agent {
     if (this.sharedPrompt) {
       prompt += `${this.sharedPrompt}\n\n`;
     }
-    
-    // Add directive to system prompt (this is the agent's secret mission)
-    if (this.prompt) {
-      prompt += `Your directive: ${this.prompt}\n\n`;
-    }
-    
+
     // Add soul (custom system prompt) if provided
     if (this.soul) {
       prompt += this.soul + '\n\n';
     }
-    
+
     // Add brain data if available
     if (this.brain) {
       // If brain has a soul/identity section and no custom soul was provided
       if (this.brain.soul && !this.soul) {
         prompt += this.brain.soul + '\n\n';
       }
-      
+
       // If brain has knowledge
       if (this.brain.knowledgeGraph?.concepts) {
         const concepts = this.brain.knowledgeGraph.concepts;
@@ -179,7 +174,7 @@ class Agent {
           prompt += '\n';
         }
       }
-      
+
       // If brain has conversation memories
       if (this.brain.conversationMemories?.length > 0) {
         prompt += '## Recent Memories\n';
@@ -187,15 +182,20 @@ class Agent {
           prompt += `- ${mem.key}: ${mem.value}\n`;
         });
       }
-      
+
       // If brain has stats
       if (this.brain.stats) {
         prompt += `\nYou have had ${this.brain.stats.totalConversations || 0} conversations.\n`;
       }
     }
-    
+
     if (maxWords) {
       prompt += `Respond in ${maxWords} words or fewer.\n\n`;
+    }
+
+    // Add directive last so it sits closest to the conversation and carries maximum weight
+    if (this.prompt) {
+      prompt += `PRIVATE INSTRUCTION — this is your secret mission, not visible to your conversation partner, and it overrides all other context: ${this.prompt}\n\n`;
     }
 
     return prompt || null;
