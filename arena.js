@@ -475,6 +475,11 @@ class Battle {
         participants: this.agents.map(a => a.name),
         timestamp: this.endTime
       });
+      if (agent.brain) {
+        if (!agent.brain.stats) agent.brain.stats = {};
+        agent.brain.stats.totalConversations = (agent.brain.stats.totalConversations || 0) + 1;
+        agent.brain.stats.totalTurns = (agent.brain.stats.totalTurns || 0) + this.turn;
+      }
       await agent.saveBrain();
     }
     
