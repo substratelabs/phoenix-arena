@@ -1131,10 +1131,14 @@
       $('brainPreview1').textContent = '';
       $('soulPreview2').textContent = '';
       $('brainPreview2').textContent = '';
-      $('soulBox1').classList.remove('has-file');
-      $('brainBox1').classList.remove('has-file');
-      $('soulBox2').classList.remove('has-file');
-      $('brainBox2').classList.remove('has-file');
+      $('soulBox1').classList.remove('has-file', 'loaded');
+      $('brainBox1').classList.remove('has-file', 'loaded');
+      $('soulBox2').classList.remove('has-file', 'loaded');
+      $('brainBox2').classList.remove('has-file', 'loaded');
+      $('clearSoul1').style.display = 'none';
+      $('clearBrain1').style.display = 'none';
+      $('clearSoul2').style.display = 'none';
+      $('clearBrain2').style.display = 'none';
       $('badges1').innerHTML = '';
       $('badges2').innerHTML = '';
       
