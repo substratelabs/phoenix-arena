@@ -19,7 +19,7 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .app { display: flex; flex-direction: column; padding: 1.25rem; gap: 1.25rem; max-width: 1800px; margin: 0 auto; padding-top: 6rem; }
+    .app { display: flex; flex-direction: column; padding: 1.25rem; gap: 1.25rem; max-width: 1800px; margin: 0 auto; padding-top: 6.5rem; }
 
     /* Navigation - Universal Header */
     nav {
@@ -214,22 +214,21 @@
     .btn.secondary:hover { border-color: var(--text2); }
 
     .arena { display: flex; gap: 1.25rem; }
-    .agent-panel { flex: 1; min-height: 400px; height: calc(100vh - 520px); background: var(--surface); border: 1px solid var(--border); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; animation: borderPulse 4s ease-in-out infinite; transition: box-shadow 150ms ease, opacity 150ms ease; }
+    .agent-panel { flex: 1; min-height: 400px; height: calc(100vh - 520px); background: var(--surface); border: 1px solid var(--border); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 150ms ease, opacity 150ms ease; }
     .agent-panel.a { border: 1px solid var(--border); border-radius: 0; }
     .agent-panel.b { border: 1px solid var(--border); border-radius: 0; }
     .agent-panel.a:hover { box-shadow: 0 0 15px rgba(255,255,255,0.04); }
     .agent-panel.b:hover { box-shadow: 0 0 15px rgba(255,255,255,0.04); }
-    .agent-panel.active { animation: none; }
     .agent-panel.a.active { box-shadow: 0 0 25px rgba(255,255,255,0.08); border-color: #ffffff; }
     .agent-panel.b.active { box-shadow: 0 0 25px rgba(255,255,255,0.08); border-color: #ffffff; }
-    .agent-panel.dimmed { animation: none; opacity: 0.5; }
-    @keyframes borderPulse { 0%,100% { border-top-color: var(--border); border-left-color: var(--border); border-right-color: var(--border); border-bottom-color: var(--border); } 50% { border-top-color: #333; border-left-color: #333; border-right-color: #333; border-bottom-color: #333; } }
+    .agent-panel.dimmed { opacity: 0.5; }
     .agent-header { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .agent-info { display: flex; align-items: center; gap: 0.5rem; }
     .agent-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
     .agent-panel.a .agent-name { color: var(--text); text-shadow: none; }
+    .agent-panel.b .agent-name { color: var(--text); text-shadow: none; }
     .agent-panel.a.active .agent-name { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.15); }
-    .agent-panel.b .agent-name { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.15); }
+    .agent-panel.b.active .agent-name { color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.15); }
     .agent-badges { display: flex; gap: 0.25rem; }
     .badge { font-size: 0.5rem; padding: 0.12rem 0.3rem; border-radius: 0.15rem; text-transform: uppercase; letter-spacing: 0.03em; }
     .badge.soul { background: rgba(249, 115, 22, 0.2); color: var(--accent); }
