@@ -231,10 +231,10 @@
     .badge.brain { background: rgba(228, 228, 231, 0.15); color: var(--text2); }
     .agent-model { font-size: 0.6rem; color: var(--text3); padding: 0.2rem 0.4rem; background: var(--bg); border-radius: 0.2rem; }
     .messages { flex: 1; overflow-y: auto; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; }
-    .message { padding: 0.85rem; background: var(--surface2); border-radius: 0.25rem; border-left: 2px solid var(--border); animation: fadeIn 0.1s ease; white-space: pre-wrap; word-wrap: break-word; }
+    .message { padding: 0.85rem; background: var(--surface2); border-radius: 0.25rem; border-left: 2px solid var(--border); white-space: pre-wrap; word-wrap: break-word; }
     .agent-panel.a .message { border-left-color: var(--agent1); }
     .agent-panel.b .message { border-left-color: var(--agent2); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
     @keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
     @keyframes turnPulse { 0% { color: var(--accent); transform: scale(1.15); } 100% { color: var(--accent); transform: scale(1); } }
     .blink-cursor { animation: blink 1s step-end infinite; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
