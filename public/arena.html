@@ -19,7 +19,7 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .app { display: flex; flex-direction: column; padding: 1.25rem; gap: 1.25rem; max-width: 1800px; margin: 0 auto; padding-top: 6.5rem; }
+    .app { display: flex; flex-direction: column; padding: 1.25rem; gap: 1.25rem; max-width: 1800px; margin: 0 auto; padding-top: calc(56px + 36px + 1.5rem); }
 
     /* Navigation - Universal Header */
     nav {
@@ -83,7 +83,7 @@
     .status-text.disconnected { color: #ef4444; }
     .battle-bar {
       position: fixed; top: 56px; left: 0; right: 0; z-index: 998;
-      height: 32px; padding: 0 2rem;
+      height: 36px; padding: 0 2rem;
       display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
       background: rgba(10,10,11,0.92); backdrop-filter: blur(16px);
     }
