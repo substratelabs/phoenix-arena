@@ -215,14 +215,9 @@
     .btn.secondary:hover { border-color: var(--text2); }
 
     .arena { display: flex; gap: 1.25rem; }
-    .agent-panel { flex: 1; min-height: 400px; height: calc(100vh - 520px); background: var(--surface); border: 1px solid var(--border); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 150ms ease, opacity 150ms ease; }
-    .agent-panel.a { border: 1px solid var(--border); border-radius: 0; }
-    .agent-panel.b { border: 1px solid var(--border); border-radius: 0; }
-    .agent-panel.a:hover { box-shadow: 0 0 15px rgba(255,255,255,0.04); }
-    .agent-panel.b:hover { box-shadow: 0 0 15px rgba(255,255,255,0.04); }
-    .agent-panel.a.active { box-shadow: 0 0 25px rgba(255,255,255,0.08); border-color: #ffffff; }
-    .agent-panel.b.active { box-shadow: 0 0 25px rgba(255,255,255,0.08); border-color: #ffffff; }
-    .agent-panel.dimmed { opacity: 0.5; }
+    .agent-panel { flex: 1; min-height: 400px; height: calc(100vh - 520px); background: var(--surface); border: 1px solid var(--border); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 400ms ease, border-color 400ms ease, opacity 400ms ease; }
+    .agent-panel.active { box-shadow: 0 0 20px rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.3); }
+    .agent-panel.dimmed { opacity: 0.6; }
     .agent-header { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .agent-info { display: flex; align-items: center; gap: 0.5rem; }
     .agent-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
