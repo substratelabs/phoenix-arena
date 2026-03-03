@@ -397,10 +397,6 @@
           <div class="settings-status" id="ollamaStatus"></div>
         </div>
       </div>
-      <div class="settings-section" style="margin-top:1rem">
-        <h4>Saved Presets</h4>
-        <div class="presets-list" id="presetsList"></div>
-      </div>
     </div>
 
     <div class="setup">
@@ -410,7 +406,7 @@
           <button class="btn secondary persist-btn" id="keepAgent1" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain1" style="display:none">Export Brain</button>
         </h3>
-        <div class="preset-select"><select id="presetSelect1"><option value="">Load preset...</option></select></div>
+        <div class="preset-select" style="display:flex;align-items:center;gap:0.4rem"><select id="presetSelect1" style="flex:1"><option value="">Load preset...</option></select><button id="deletePreset1" onclick="deleteSelectedPreset(1)" style="display:none;background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;border-radius:0.25rem;padding:0.2rem 0.4rem;line-height:1" title="Delete preset">✕</button></div>
         <div class="field"><label>Name</label><input type="text" id="name1" value="Agent 1"></div>
         <div class="field"><label>Model</label><select id="model1"></select></div>
         <div class="field">
@@ -505,7 +501,7 @@
           <button class="btn secondary persist-btn" id="keepAgent2" style="display:none">Keep</button>
           <button class="btn secondary persist-btn export-brain-btn" id="exportBrain2" style="display:none">Export Brain</button>
         </h3>
-        <div class="preset-select"><select id="presetSelect2"><option value="">Load preset...</option></select></div>
+        <div class="preset-select" style="display:flex;align-items:center;gap:0.4rem"><select id="presetSelect2" style="flex:1"><option value="">Load preset...</option></select><button id="deletePreset2" onclick="deleteSelectedPreset(2)" style="display:none;background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;border-radius:0.25rem;padding:0.2rem 0.4rem;line-height:1" title="Delete preset">✕</button></div>
         <div class="field"><label>Name</label><input type="text" id="name2" value="Agent 2"></div>
         <div class="field"><label>Model</label><select id="model2"></select></div>
         <div class="field">
@@ -709,24 +705,14 @@
     function updateModelDropdowns() { const m = []; if (config.providers?.anthropic?.enabled) m.push({ id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', p: 'anthropic' }, { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', p: 'anthropic' }, { id: 'claude-haiku-4-20250514', name: 'Claude Haiku 4', p: 'anthropic' }); if (config.providers?.ollama?.enabled) m.push({ id: 'llama3', name: 'Llama 3', p: 'ollama' }, { id: 'llama3:70b', name: 'Llama 3 70B', p: 'ollama' }, { id: 'mistral', name: 'Mistral', p: 'ollama' }, { id: 'mixtral', name: 'Mixtral', p: 'ollama' }); if (!m.length) m.push({ id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', p: 'anthropic' }); const o = m.map(x => `<option value="${x.id}" data-provider="${x.p}">${x.name}</option>`).join(''); $('model1').innerHTML = o; $('model2').innerHTML = o; }
 
     // Presets
-    function updatePresetsList() { 
-      const n = Object.keys(presets); 
-      const presetsList = $('presetsList');
-      if (presetsList) presetsList.innerHTML = n.length
-        ? n.map(x => {
-            const p = presets[x];
-            const id = p.id || x;
-            const idArg = !isNaN(parseInt(id)) ? parseInt(id) : `'${id}'`;
-            return `<div class="preset-chip"><span>${x}</span><span class="delete" onclick="deletePreset(${idArg}, '${x}')">✕</span></div>`;
-          }).join('')
-        : '<span style="color:var(--text3);font-size:0.75rem">' + (currentUser ? 'No presets saved' : 'Sign in to save presets') + '</span>';
-      const o = '<option value="">Load preset...</option>' + n.map(x => `<option value="${x}">${x}</option>`).join('');
+    function updatePresetsList() {
+      const n = Object.keys(presets);
+      const o = '<option value="">Load preset...</option>' + n.map(x => '<option value="' + x + '">' + x + '</option>').join('');
       const presetSelect1 = $('presetSelect1');
       if (presetSelect1) presetSelect1.innerHTML = o;
       const presetSelect2 = $('presetSelect2');
       if (presetSelect2) presetSelect2.innerHTML = o;
     }
-    
     async function saveAgentPreset(num) {
       const a = agents[num];
       const n = ($(`name${num}`).value || `Agent ${num}`).trim();
@@ -766,6 +752,17 @@
       }
     }
     
+    async function deleteSelectedPreset(num) {
+      const sel = $(`presetSelect${num}`);
+      const name = sel.value;
+      if (!name || !presets[name]) return;
+      const p = presets[name];
+      const id = p.id;
+      await deletePreset(id != null ? id : name, name);
+      sel.value = '';
+      $(`deletePreset${num}`).style.display = 'none';
+    }
+
     function loadPreset(num, name) { if (!name || !presets[name]) return; const p = presets[name]; agents[num] = { ...agents[num], ...p }; $(`name${num}`).value = p.name || `Agent ${num}`; if (p.soul) { $(`soulBox${num}`).classList.add('loaded'); $(`soulPreview${num}`).textContent = p.soulName || p.soul_name || 'Loaded'; $(`clearSoul${num}`).style.display = 'block'; } if (p.brain) { $(`brainBox${num}`).classList.add('loaded'); $(`brainPreview${num}`).textContent = getBrainStats(p.brain); $(`clearBrain${num}`).style.display = 'block'; } }
 
     // Uploads
@@ -1178,6 +1175,8 @@
       // Reset preset selects
       $('presetSelect1').value = '';
       $('presetSelect2').value = '';
+      $('deletePreset1').style.display = 'none';
+      $('deletePreset2').style.display = 'none';
       
       // Clear battle state
       battle = null;
@@ -1339,8 +1338,8 @@
       $('clearApiKey').style.display = 'inline-block';
     }
     
-    $('presetSelect1').onchange = e => loadPreset(1, e.target.value);
-    $('presetSelect2').onchange = e => loadPreset(2, e.target.value);
+    $('presetSelect1').onchange = e => { loadPreset(1, e.target.value); $('deletePreset1').style.display = e.target.value ? 'block' : 'none'; };
+    $('presetSelect2').onchange = e => { loadPreset(2, e.target.value); $('deletePreset2').style.display = e.target.value ? 'block' : 'none'; };
     $('advancedToggle').onclick = toggleAdvanced;
     $('promptMode').onchange = updatePromptMode;
     $('anonymousToggle').onclick = toggleAnonymous;
