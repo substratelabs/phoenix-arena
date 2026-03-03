@@ -397,6 +397,10 @@
           <div class="settings-status" id="ollamaStatus"></div>
         </div>
       </div>
+      <div class="settings-section" style="margin-top:1rem">
+        <h4>Saved Presets</h4>
+        <div class="presets-list" id="presetsList"></div>
+      </div>
     </div>
 
     <div class="setup">
@@ -707,17 +711,20 @@
     // Presets
     function updatePresetsList() { 
       const n = Object.keys(presets); 
-      $('presetsList').innerHTML = n.length 
+      const presetsList = $('presetsList');
+      if (presetsList) presetsList.innerHTML = n.length
         ? n.map(x => {
             const p = presets[x];
             const id = p.id || x;
             const idArg = !isNaN(parseInt(id)) ? parseInt(id) : `'${id}'`;
             return `<div class="preset-chip"><span>${x}</span><span class="delete" onclick="deletePreset(${idArg}, '${x}')">✕</span></div>`;
-          }).join('') 
-        : '<span style="color:var(--text3);font-size:0.75rem">' + (currentUser ? 'No presets saved' : 'Sign in to save presets') + '</span>'; 
-      const o = '<option value="">Load preset...</option>' + n.map(x => `<option value="${x}">${x}</option>`).join(''); 
-      $('presetSelect1').innerHTML = o; 
-      $('presetSelect2').innerHTML = o; 
+          }).join('')
+        : '<span style="color:var(--text3);font-size:0.75rem">' + (currentUser ? 'No presets saved' : 'Sign in to save presets') + '</span>';
+      const o = '<option value="">Load preset...</option>' + n.map(x => `<option value="${x}">${x}</option>`).join('');
+      const presetSelect1 = $('presetSelect1');
+      if (presetSelect1) presetSelect1.innerHTML = o;
+      const presetSelect2 = $('presetSelect2');
+      if (presetSelect2) presetSelect2.innerHTML = o;
     }
     
     async function saveAgentPreset(num) {
