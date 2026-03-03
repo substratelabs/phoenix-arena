@@ -711,7 +711,8 @@
         ? n.map(x => {
             const p = presets[x];
             const id = p.id || x;
-            return `<div class="preset-chip"><span>${x}</span><span class="delete" onclick="deletePreset('${id}', '${x}')">✕</span></div>`;
+            const idArg = !isNaN(parseInt(id)) ? parseInt(id) : `'${id}'`;
+            return `<div class="preset-chip"><span>${x}</span><span class="delete" onclick="deletePreset(${idArg}, '${x}')">✕</span></div>`;
           }).join('') 
         : '<span style="color:var(--text3);font-size:0.75rem">' + (currentUser ? 'No presets saved' : 'Sign in to save presets') + '</span>'; 
       const o = '<option value="">Load preset...</option>' + n.map(x => `<option value="${x}">${x}</option>`).join(''); 
@@ -719,13 +720,13 @@
       $('presetSelect2').innerHTML = o; 
     }
     
-    function saveAgentPreset(num) {
+    async function saveAgentPreset(num) {
       const a = agents[num];
       const n = ($(`name${num}`).value || `Agent ${num}`).trim();
       const presetName = prompt('Save preset as:', n);
       if (!presetName) return;
       if (currentUser) {
-        savePresetToServer(presetName, a);
+        await savePresetToServer(presetName, a);
       } else {
         presets[presetName] = { name: a.name, soul: a.soul, soulName: a.soulName, brain: a.brain, brainName: a.brainName };
         localStorage.setItem('phoenix_presets', JSON.stringify(presets));
@@ -748,9 +749,9 @@
       $('newPresetName').value = '';
     }
     
-    async function deletePreset(id, name) { 
-      if (currentUser && typeof id === 'number') {
-        await deletePresetFromServer(id);
+    async function deletePreset(id, name) {
+      if (currentUser && (typeof id === 'number' || !isNaN(parseInt(id)))) {
+        await deletePresetFromServer(typeof id === 'number' ? id : parseInt(id));
       } else {
         delete presets[name || id]; 
         localStorage.setItem('phoenix_presets', JSON.stringify(presets)); 
